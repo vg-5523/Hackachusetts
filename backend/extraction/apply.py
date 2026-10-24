@@ -78,6 +78,33 @@ def _coerce_acuity(value: Any) -> int | None:
     return ivalue if 1 <= ivalue <= 5 else None
 
 
+def _coerce_str(value: Any) -> str | None:
+    """Coerce a string-scalar proposal value to ``str`` for the schema.
+
+    ``age``, ``sex``, ``chief_complaint``, ``suspected_condition`` and ``eta``
+    are ``Sourced[str]`` in ``shared/schema.py``, but an LLM (or a cached
+    response) may propose a non-string such as the integer ``58`` for ``age``.
+    Coercing here, at apply time, keeps the stored value schema-valid (so
+    ``model_dump_json`` emits no pydantic serializer warning) without editing
+    any cached response on disk.
+
+    ``None`` is returned unchanged (the caller skips it); a ``bool`` is rejected
+    (``True``/``False`` are never meaningful string scalars and ``str(True)``
+    would be misleading). Everything else is stringified with ``str`` and, for a
+    float that is integral (e.g. ``58.0``), rendered without the trailing
+    ``.0`` so ``age`` reads ``"58"`` rather than ``"58.0"``.
+    """
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, str):
+        return value
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value))
+    return str(value)
+
+
 def apply_proposals(
     record: PatientRecord, proposals: list[Proposal], utterance: Utterance
 ) -> PatientRecord:
@@ -90,7 +117,14 @@ def apply_proposals(
         )
 
         if proposal.path in _SCALAR_PATHS:
-            _apply_scalar(getattr(out, proposal.path), proposal.value, ref, proposal)
+            # These fields are ``Sourced[str]``; coerce a non-string value (e.g.
+            # the int 58 proposed for ``age``) to ``str`` so the stored record
+            # is schema-valid and ``model_dump_json`` emits no warning. A value
+            # that cannot be a meaningful string scalar is skipped.
+            scalar_value = _coerce_str(proposal.value)
+            if scalar_value is None:
+                continue
+            _apply_scalar(getattr(out, proposal.path), scalar_value, ref, proposal)
 
         elif proposal.path == "acuity_esi":
             acuity = _coerce_acuity(proposal.value)
