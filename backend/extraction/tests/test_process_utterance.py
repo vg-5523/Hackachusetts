@@ -1,7 +1,8 @@
-﻿"""Required example tests for the extraction pipeline (Req 7.1-7.4).
+﻿"""Example tests for the extraction pipeline.
 
-All tests patch ``backend.llm.call_llm`` so no network call is made, and point
-the cache at a temporary directory so the committed demo cache is untouched.
+Tests that drive the LLM branch patch ``backend.llm.call_llm`` AND set
+``LLM_API_KEY`` so the orchestrator takes the LLM path (not the rules fallback).
+The cache is pointed at a temp dir so the committed cache is untouched.
 """
 
 from __future__ import annotations
@@ -30,8 +31,9 @@ def _facts(*facts: dict) -> str:
 
 @pytest.fixture
 def isolated_cache(tmp_path, monkeypatch):
-    """Point the cache at a temp dir so tests never touch the committed cache."""
+    """Temp cache + a set key so the LLM branch runs when call_llm is patched."""
     monkeypatch.setattr(cache_mod, "CACHE_DIR", tmp_path)
+    monkeypatch.setenv("LLM_API_KEY", "test-key")
     return tmp_path
 
 
@@ -40,8 +42,9 @@ def _patch_llm(monkeypatch, response: str) -> None:
 
 
 def test_no_allergies_then_penicillin(isolated_cache, monkeypatch):
-    """Both allergy values survive with their own sources so the store can
-    later mark ``allergies`` conflicted (Req 7.2, 3.2)."""
+    """"no known allergies" records value == [] with a source; a later
+    penicillin fact adds the allergy and keeps the first source, so the store
+    can mark ``allergies`` conflicted."""
     rec = PatientRecord()
 
     u1 = _utt("u1", "Patient reports no known allergies.", minute=0)
@@ -58,6 +61,7 @@ def test_no_allergies_then_penicillin(isolated_cache, monkeypatch):
         ),
     )
     rec = ex.process_utterance(u1, rec)
+    assert rec.allergies.value == []  # empty list, not null
 
     u2 = _utt("u2", "Found a penicillin allergy bracelet on the patient.", minute=3)
     _patch_llm(
@@ -74,7 +78,7 @@ def test_no_allergies_then_penicillin(isolated_cache, monkeypatch):
     )
     rec = ex.process_utterance(u2, rec)
 
-    assert rec.allergies.value == ["none", "penicillin"]
+    assert rec.allergies.value == ["penicillin"]
     # One SourceRef per utterance remains, so the store sees two origins.
     ids = {s.utterance_id for s in rec.allergies.sources}
     assert ids == {"u1", "u2"}
@@ -84,7 +88,7 @@ def test_no_allergies_then_penicillin(isolated_cache, monkeypatch):
 
 def test_aspirin_given_twice(isolated_cache, monkeypatch):
     """Aspirin administered twice yields two ``meds_given`` entries, each with
-    its own SourceRef (Req 7.3)."""
+    its own SourceRef."""
     rec = PatientRecord()
 
     u1 = _utt("u1", "Aspirin 300mg PO given.", minute=0)
@@ -123,23 +127,31 @@ def test_aspirin_given_twice(isolated_cache, monkeypatch):
     assert [m.sources[0].utterance_id for m in rec.meds_given] == ["u1", "u2"]
 
 
-def test_no_key_no_cache_raises(isolated_cache, monkeypatch):
-    """With no key and an empty cache, a RuntimeError naming LLM_API_KEY
-    propagates to the caller (Req 6.1, 6.2)."""
+def test_no_key_no_cache_falls_back_to_rules(tmp_path, monkeypatch):
+    """With no key and an empty cache, process_utterance does NOT raise: it
+    falls back to the deterministic rules extractor."""
+    monkeypatch.setattr(cache_mod, "CACHE_DIR", tmp_path)
     monkeypatch.delenv("LLM_API_KEY", raising=False)
+
+    # Guard: call_llm must never be reached on this path.
+    def _boom(prompt):  # pragma: no cover - should not be called
+        raise AssertionError("call_llm must not be called without a key")
+
+    monkeypatch.setattr("backend.llm.call_llm", _boom)
+
     rec = PatientRecord()
-    u1 = _utt("u1", "Chest pain radiating to the left arm.", minute=0)
+    u1 = _utt("u1", "54 year old male with chest pain, aspirin 300mg given.", minute=0)
+    out = ex.process_utterance(u1, rec)  # must not raise
 
-    with pytest.raises(RuntimeError, match="LLM_API_KEY"):
-        ex.process_utterance(u1, rec)
-
-    # No partial write to the record.
-    assert rec.chief_complaint.value is None
+    # Rules recovered some facts, all marked unverified.
+    assert out.chief_complaint.value == "chest pain"
+    assert out.chief_complaint.status == FieldStatus.unverified
+    assert any(m.value.drug == "aspirin" for m in out.meds_given)
+    assert rec.chief_complaint.value is None  # input untouched
 
 
 def test_quote_not_substring_dropped(isolated_cache, monkeypatch):
-    """A fact whose quote is not in the utterance text is dropped (Req 2.3,
-    2.4)."""
+    """A fact whose quote is not in the utterance text is dropped."""
     rec = PatientRecord()
     u1 = _utt("u1", "Patient is 54 years old.", minute=0)
     _patch_llm(
@@ -169,8 +181,7 @@ def test_quote_not_substring_dropped(isolated_cache, monkeypatch):
 
 
 def test_input_record_not_mutated(isolated_cache, monkeypatch):
-    """The input record is byte-for-byte identical after extraction (Req
-    3.1)."""
+    """The input record is byte-for-byte identical after extraction."""
     rec = PatientRecord()
     before = rec.model_dump_json()
 
