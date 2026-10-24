@@ -1,0 +1,4 @@
+# Shared Contract Change Requests
+
+- Account A (`backend/extraction/apply.py`): coerce `age` to `str` before storing it. The live pipeline currently sets `age.value` to the integer `58`, but `shared/schema.py` types `PatientRecord.age` as `Sourced[str]`, so the live API emits a pydantic serializer warning and strict re-validation fails. Apply `str(...)` to the age proposal value in `_apply_scalar` (or in `rules_extract`).
+- Account D (`backend/store/persist.py`): `save`/`load` now read `DEFAULT_PATH` at call time (`path=None` -> `path or DEFAULT_PATH`) instead of binding it as a default argument, so monkeypatching `persist.DEFAULT_PATH` (tests redirecting to a temp file) reliably redirects all persistence. `shared/mock_record.json` and `shared/types.ts` were already correct (`age` is a string) and were not changed.
