@@ -47,7 +47,7 @@ REPLACE_RETRIES = 5
 REPLACE_WAIT_S = 0.05
 
 
-def save(events: list[Event], path: Path | str = DEFAULT_PATH) -> None:
+def save(events: list[Event], path: Path | str | None = None) -> None:
     """Persist ``events`` to ``path`` as a JSON list, resiliently.
 
     Strategy, in order:
@@ -64,8 +64,13 @@ def save(events: list[Event], path: Path | str = DEFAULT_PATH) -> None:
 
     The happy path is still atomic. Only a persistent disk failure degrades to
     the non-atomic write, and only a total failure degrades to "memory only".
+
+    ``path`` defaults to ``None`` and is resolved to the module-level
+    :data:`DEFAULT_PATH` AT CALL TIME, so monkeypatching ``persist.DEFAULT_PATH``
+    (e.g. in tests, to a temp file) redirects persistence here. A binding of the
+    default at def time would ignore such a monkeypatch.
     """
-    path = Path(path)
+    path = Path(path if path is not None else DEFAULT_PATH)
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
     except OSError as exc:
@@ -158,15 +163,19 @@ def _atomic_replace_with_retries(path: Path, payload: str) -> bool:
     return False
 
 
-def load(path: Path | str = DEFAULT_PATH) -> list[Event]:
+def load(path: Path | str | None = None) -> list[Event]:
     """Load and validate the Event_Log from ``path``.
 
     Returns ``[]`` when the file does not exist. Otherwise the file is parsed as
     JSON whose top level must be a list, and every item is validated with
     ``Event.model_validate``. Any corruption (bad JSON, a non-list top level, or
     an item that fails validation) raises ``ValueError`` wrapping the cause.
+
+    ``path`` defaults to ``None`` and is resolved to the module-level
+    :data:`DEFAULT_PATH` AT CALL TIME, so a monkeypatched ``DEFAULT_PATH`` (tests
+    redirecting to a temp file) is honored here too.
     """
-    path = Path(path)
+    path = Path(path if path is not None else DEFAULT_PATH)
     if not path.exists():
         return []
 

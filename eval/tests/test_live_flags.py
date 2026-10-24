@@ -39,21 +39,36 @@ def _fact(eid, path, value, uid, quote, minute):
 
 @pytest.fixture()
 def live_main(tmp_path, monkeypatch):
-    """Import backend.main in live mode with persistence on a temp path."""
+    """Import backend.main in live mode with persistence on a temp path.
+
+    Teardown drops ``backend.main`` from ``sys.modules`` so the next test module
+    re-imports it fresh (module-level ``SCRIBE_MODE`` is read at import time) and
+    never inherits this fixture's live mode. Without that cleanup a later stub
+    test would read a live-mode app whose store still holds this test's events
+    (e.g. an int ``age`` from extraction), which would flunk its mock reads.
+    """
+    import sys
+
     monkeypatch.setenv("SCRIBE_MODE", "live")
     monkeypatch.delenv("LLM_API_KEY", raising=False)
 
+    # persist.save/load resolve DEFAULT_PATH at call time, so patching it here
+    # redirects ALL persistence (append, clear) to the temp file.
     import backend.store.persist as persist
     log_path = tmp_path / "event_log.json"
     monkeypatch.setattr(persist, "DEFAULT_PATH", log_path)
-    import backend.store.log as log
-    monkeypatch.setattr(log.persist, "DEFAULT_PATH", log_path)
 
-    import backend.main as main
-    main = importlib.reload(main)  # re-read SCRIBE_MODE under the env override
+    # Re-import backend.main fresh so module-level SCRIBE_MODE picks up "live".
+    sys.modules.pop("backend.main", None)
+    main = importlib.import_module("backend.main")
     import backend.store as store
     store.reset()
-    return main, store
+    try:
+        yield main, store
+    finally:
+        # Leave no live-mode module behind for the next test to inherit.
+        sys.modules.pop("backend.main", None)
+        store.reset()
 
 
 def test_conflicted_allergies_yields_contradiction_flag(live_main):
