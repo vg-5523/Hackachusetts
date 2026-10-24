@@ -157,6 +157,64 @@ def _apply_scalar_fact(
     field.status = FieldStatus.conflicted
 
 
+def _apply_allergies_fact(
+    field: Sourced,
+    value: Any,
+    source: SourceRef,
+    confidence: float,
+) -> None:
+    """Merge an ``allergies`` fact into an already-copied ``Sourced[list[str]]``.
+
+    ``allergies`` is list-valued, so unlike a scalar we never "keep the old
+    value" wholesale. Instead we union the member strings (order-preserving,
+    de-duplicated) so a named allergy observed after a "no known allergies"
+    claim is surfaced in ``value`` rather than hidden behind the earlier empty
+    list.
+
+    Status follows the record's contradiction contract:
+
+    - First observation (no sources yet): set the value, mark ``unverified``.
+    - A later observation that CONTRADICTS an earlier one -- i.e. one claims no
+      allergies (empty list) while the other names at least one -- marks the
+      field ``conflicted`` (the value still becomes the union so the real
+      allergy is visible). Matching the stored "no allergies" claim with another
+      "no allergies" (both empty) is corroboration, not conflict.
+    - Otherwise (e.g. an additional allergy with no empty-vs-nonempty clash) the
+      status is left as-is.
+
+    The new source is always appended (de-duplicated on id+quote) so provenance
+    for every observation is preserved.
+    """
+    incoming = list(value) if isinstance(value, (list, tuple)) else ([] if value is None else [value])
+
+    if not field.sources:
+        field.value = incoming
+        field.status = FieldStatus.unverified
+        field.confidence = confidence
+        field.sources.append(source)
+        return
+
+    current = list(field.value) if isinstance(field.value, list) else []
+
+    # Detect an empty-vs-non-empty contradiction across observations: a prior
+    # "no allergies" (current empty) now contradicted by a named allergy, or the
+    # reverse (a named allergy now contradicted by a "no allergies" claim).
+    contradicts = (len(current) == 0) != (len(incoming) == 0)
+
+    # Union the members, preserving order and removing duplicates.
+    merged = list(current)
+    for item in incoming:
+        if item not in merged:
+            merged.append(item)
+    field.value = merged
+
+    if not _already_cited(field.sources, source):
+        field.sources.append(source)
+
+    if contradicts:
+        field.status = FieldStatus.conflicted
+
+
 def _apply_fact(record: PatientRecord, payload: dict) -> None:
     """Apply a ``fact`` event to an already-copied ``record`` in place."""
     path = payload["path"]
@@ -184,6 +242,12 @@ def _apply_fact(record: PatientRecord, payload: dict) -> None:
     target = _resolve_sourced(record, path)
     if target is None:
         # Path does not address a mergeable Sourced field; leave state intact.
+        return
+    if path == "allergies":
+        # ``allergies`` is a LIST-valued Sourced: merge list members rather than
+        # treat the whole list as an opaque scalar, so a real allergy is never
+        # hidden behind an earlier "no known allergies" (==> value []).
+        _apply_allergies_fact(target, value, source, confidence)
         return
     _apply_scalar_fact(target, value, source, confidence)
 
