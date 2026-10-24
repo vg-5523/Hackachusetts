@@ -1,0 +1,236 @@
+// GENERATED FILE - DO NOT EDIT BY HAND.
+// Regenerate with: python eval/gen_mock_typecheck.py
+//
+// This file exists solely to type-check shared/mock_record.json against
+// the hand-written contract in shared/types.ts. The JSON is embedded
+// inline (not imported) so string-literal-union / enum fields are checked
+// against their exact types instead of being widened to `string`.
+//
+// Type-check (never emits) with the compiler in frontend/:
+//   frontend/node_modules/.bin/tsc --noEmit -p eval/tsconfig.mock.json
+import type { PatientRecord, Flag } from "../shared/types";
+
+const record: PatientRecord = {
+  "age": {
+    "value": "58",
+    "status": "unverified",
+    "confidence": 0.6,
+    "sources": [
+      {
+        "utterance_id": "utt-0002",
+        "quote": "Looks like he's about 58 years old.",
+        "ts": "2024-01-15T09:12:30+00:00"
+      }
+    ]
+  },
+  "sex": {
+    "value": "male",
+    "status": "unverified",
+    "confidence": 0.6,
+    "sources": [
+      {
+        "utterance_id": "utt-0002",
+        "quote": "Patient is a male, found at home.",
+        "ts": "2024-01-15T09:12:30+00:00"
+      }
+    ]
+  },
+  "chief_complaint": {
+    "value": "crushing central chest pain radiating to the left arm",
+    "status": "confirmed",
+    "confidence": 0.95,
+    "sources": [
+      {
+        "utterance_id": "utt-0003",
+        "quote": "He's got crushing central chest pain radiating to the left arm.",
+        "ts": "2024-01-15T09:13:05+00:00"
+      }
+    ]
+  },
+  "suspected_condition": {
+    "value": "STEMI",
+    "status": "confirmed",
+    "confidence": 0.92,
+    "sources": [
+      {
+        "utterance_id": "utt-0004",
+        "quote": "Twelve-lead shows ST elevation in the inferior leads, calling it a STEMI.",
+        "ts": "2024-01-15T09:14:10+00:00"
+      }
+    ]
+  },
+  "eta": {
+    "value": null,
+    "status": "unknown",
+    "confidence": 0,
+    "sources": []
+  },
+  "acuity_esi": {
+    "value": 1,
+    "status": "confirmed",
+    "confidence": 0.9,
+    "sources": [
+      {
+        "utterance_id": "utt-0004",
+        "quote": "This is a level one, we are running hot.",
+        "ts": "2024-01-15T09:14:10+00:00"
+      }
+    ]
+  },
+  "allergies": {
+    "value": [
+      "penicillin"
+    ],
+    "status": "conflicted",
+    "confidence": 0.7,
+    "sources": [
+      {
+        "utterance_id": "utt-0005",
+        "quote": "He says he has no allergies.",
+        "ts": "2024-01-15T09:15:00+00:00"
+      },
+      {
+        "utterance_id": "utt-0009",
+        "quote": "Found a penicillin allergy bracelet on his wrist.",
+        "ts": "2024-01-15T09:19:40+00:00"
+      }
+    ]
+  },
+  "meds_given": [
+    {
+      "value": {
+        "drug": "aspirin",
+        "dose": "324 mg",
+        "route": "chewed oral",
+        "time": "2024-01-15T09:16:20+00:00",
+        "given_by": "medic one"
+      },
+      "status": "confirmed",
+      "confidence": 0.9,
+      "sources": [
+        {
+          "utterance_id": "utt-0006",
+          "quote": "Aspirin 324 milligrams chewed, given.",
+          "ts": "2024-01-15T09:16:20+00:00"
+        }
+      ]
+    },
+    {
+      "value": {
+        "drug": "nitroglycerin",
+        "dose": "0.4 mg",
+        "route": "sublingual",
+        "time": "2024-01-15T09:17:05+00:00",
+        "given_by": "medic one"
+      },
+      "status": "confirmed",
+      "confidence": 0.88,
+      "sources": [
+        {
+          "utterance_id": "utt-0007",
+          "quote": "Gave one nitro sublingual, 0.4 milligrams.",
+          "ts": "2024-01-15T09:17:05+00:00"
+        }
+      ]
+    },
+    {
+      "value": {
+        "drug": "aspirin",
+        "dose": "324 mg",
+        "route": "chewed oral",
+        "time": "2024-01-15T09:20:15+00:00",
+        "given_by": "medic two"
+      },
+      "status": "confirmed",
+      "confidence": 0.85,
+      "sources": [
+        {
+          "utterance_id": "utt-0010",
+          "quote": "Give him another aspirin, 324 chewable.",
+          "ts": "2024-01-15T09:20:15+00:00"
+        }
+      ]
+    }
+  ],
+  "vitals_timeline": [
+    {
+      "ts": "2024-01-15T09:13:30+00:00",
+      "hr": 92,
+      "bp": "148/92",
+      "spo2": 95,
+      "rr": 20,
+      "source": "monitor"
+    },
+    {
+      "ts": "2024-01-15T09:16:45+00:00",
+      "hr": 88,
+      "bp": "138/86",
+      "spo2": 97,
+      "rr": 18,
+      "source": "monitor"
+    },
+    {
+      "ts": "2024-01-15T09:19:00+00:00",
+      "hr": 84,
+      "bp": "132/80",
+      "spo2": 98,
+      "rr": 16,
+      "source": "monitor"
+    }
+  ],
+  "notes": "Synthetic STEMI training run. Crew reported no allergies early, then found a penicillin allergy bracelet. Aspirin administered twice during transport."
+};
+
+const flags: Flag[] = [
+  {
+    "id": "duplicate_dose:c29ba21a6784",
+    "type": "duplicate_dose",
+    "severity": "warn",
+    "message": "Aspirin appears to have been administered twice (324 mg at 09:16 and again at 09:20).",
+    "say_to_crew": "Heads up: aspirin looks like it was given twice. Confirm total dose before any further administration.",
+    "evidence": [
+      "Aspirin 324 milligrams chewed, given.",
+      "Give him another aspirin, 324 chewable."
+    ],
+    "source_ref": {
+      "name": "Aspirin dosing reference (synthetic)",
+      "url": "https://example.org/meds/aspirin"
+    },
+    "status": "open"
+  },
+  {
+    "id": "contradiction:95003edb645a",
+    "type": "contradiction",
+    "severity": "critical",
+    "message": "Allergy status is contradictory: crew first reported no allergies, then found a penicillin allergy bracelet.",
+    "say_to_crew": "Allergy conflict: earlier no allergies, now a penicillin bracelet found. Treat as penicillin allergic until clarified.",
+    "evidence": [
+      "He says he has no allergies.",
+      "Found a penicillin allergy bracelet on his wrist."
+    ],
+    "source_ref": {
+      "name": "Allergy documentation guidance (synthetic)",
+      "url": "https://example.com/safety/allergy-conflict"
+    },
+    "status": "open"
+  },
+  {
+    "id": "allergy_conflict:339a7f52e97d",
+    "type": "allergy_conflict",
+    "severity": "info",
+    "message": "A penicillin allergy was identified; review any planned antibiotics against this allergy.",
+    "say_to_crew": "Note the penicillin allergy bracelet. Flag it to the receiving team for antibiotic planning.",
+    "evidence": [
+      "Found a penicillin allergy bracelet on his wrist."
+    ],
+    "source_ref": {
+      "name": "Penicillin allergy reference (synthetic)",
+      "url": "https://example.net/meds/penicillin-allergy"
+    },
+    "status": "open"
+  }
+];
+
+// Reference the bindings so `noUnusedLocals` does not reject them.
+void record;
+void flags;

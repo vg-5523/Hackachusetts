@@ -1,0 +1,27 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Node / frontend dependencies
+node_modules/
+
+# Frontend build output
+frontend/dist/
+
+# Environment files (keep the example)
+.env
+.env.*
+!.env.example
+
+# Event log (runtime data)
+backend/store/event_log.json
+'n.venv311/
+.venv311/
+.verify_venv/

@@ -1,0 +1,347 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 [BLOCKING] Create the backend, shared, scenarios, and eval skeleton": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792859842631
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860171775
+      }
+    ],
+    "1.2 [BLOCKING] Add `.gitignore` and `.env.example`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792859844056
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860173038
+      }
+    ],
+    "1.3 [BLOCKING] Scaffold the Vite + React + TypeScript + Tailwind frontend": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792859845471
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860174421
+      }
+    ],
+    "2.1 [BLOCKING] Define enums, `SourceRef`, `Citation`, and `Sourced[T]` in `shared/schema.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792859847305
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860176330
+      }
+    ],
+    "5.1 [BLOCKING] Write `call_llm(prompt: str) -> str` in `backend/llm.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792859848335
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860177486
+      }
+    ],
+    "1.4 [BLOCKING] Write `.kiro/steering/product.md`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860183477
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860383282
+      }
+    ],
+    "1.5 [BLOCKING] Write `.kiro/steering/tech.md`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860184915
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860384700
+      }
+    ],
+    "1.6 [BLOCKING] Write `.kiro/steering/structure.md`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860186319
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860386565
+      }
+    ],
+    "2.2 [BLOCKING] Add `Medication`, `VitalsEntry`, and `PatientRecord` to `shared/schema.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860187727
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860387967
+      }
+    ],
+    "2.7 [BLOCKING] Write `shared/api.md`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860189016
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860389065
+      }
+    ],
+    "1. [BLOCKING] Repository skeleton and steering files": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860386640
+      }
+    ],
+    "2.3 [BLOCKING] Add `Flag`, `ErrorBody`, `Utterance`, `UtteranceRequest`, `Event`, `ClockEntry`, and `Clocks` to `shared/schema.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860393641
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860545348
+      }
+    ],
+    "2.6 [BLOCKING] Write `shared/types.ts` by hand to mirror `shared/schema.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860550701
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860700829
+      }
+    ],
+    "3.1 [BLOCKING] Write `shared/mock_record.json`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860552168
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860702263
+      }
+    ],
+    "5.5 [BLOCKING] Stub `append`, `events`, `derive`, `facts_from`, and `subscribe` in `backend/store/__init__.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860553980
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860706448
+      }
+    ],
+    "5.2 [BLOCKING] Stub `process_utterance` in `backend/extraction/__init__.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860555429
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860703661
+      }
+    ],
+    "5.3 [BLOCKING] Stub `evaluate` in `backend/safety/__init__.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860556577
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860705077
+      }
+    ],
+    "2. [BLOCKING] Shared schema, TypeScript types, and API spec": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860700949
+      }
+    ],
+    "5.4 [BLOCKING] Stub `make_sbar`, `make_pre_alert`, and `make_checklist` in `backend/outputs/__init__.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860718914
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860807561
+      }
+    ],
+    "5. [BLOCKING] Module interface stubs": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860807692
+      }
+    ],
+    "3.2 [BLOCKING] Write `eval/validate_mock.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860821163
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860956775
+      }
+    ],
+    "3.3 [BLOCKING] Add the `tsc --noEmit` mock type check": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860822174
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860957728
+      }
+    ],
+    "3. [BLOCKING] Mock data and contract checks": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860957840
+      }
+    ],
+    "4.1 [BLOCKING] Create the app shell in `backend/main.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792860961847
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792861245354
+      }
+    ],
+    "4.2 [BLOCKING] Add the GET endpoints to `backend/main.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792861248475
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792861366162
+      }
+    ],
+    "4.3 [BLOCKING] Add `POST /api/utterance` and the scenario endpoints to `backend/main.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792861369062
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792861449156
+      }
+    ],
+    "4.4 [BLOCKING] Add relay, ack, and confirm endpoints to `backend/main.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792861452087
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792861567080
+      }
+    ],
+    "4.5 [BLOCKING] Add `GET /api/stream` SSE to `backend/main.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792861569966
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792861705332
+      }
+    ],
+    "4.6 [BLOCKING] Write a stub smoke test in `eval/tests/test_stub_smoke.py`": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792861708968
+      },
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792861842135
+      }
+    ],
+    "4. [BLOCKING] FastAPI stub server serving mocks": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792861842243
+      }
+    ],
+    "6.1 [BLOCKING] Rewrite `README.md` with run instructions": [
+      {
+        "executionId": "d6994ccb-c220-448f-97e4-d4d4b8c6bb98",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792861845296
+      }
+    ]
+  }
+}
