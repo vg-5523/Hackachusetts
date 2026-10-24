@@ -22,6 +22,8 @@ from __future__ import annotations
 
 import os
 
+from dotenv import load_dotenv
+
 from shared.schema import PatientRecord, Utterance
 
 from backend import llm
@@ -48,6 +50,15 @@ __all__ = [
 
 
 def _llm_key_set() -> bool:
+    """Return True when LLM_API_KEY is available.
+
+    Consults the process environment first; if absent, loads a repo-root .env
+    (the same fallback backend.llm.call_llm uses) so the orchestrator agrees
+    with the wrapper about whether a key exists. The key value is never logged.
+    """
+    if os.environ.get("LLM_API_KEY"):
+        return True
+    load_dotenv()
     return bool(os.environ.get("LLM_API_KEY"))
 
 

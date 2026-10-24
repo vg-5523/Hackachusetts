@@ -1,0 +1,4 @@
+{
+  "text": "Correction on the allergy history, patient has a penicillin allergy bracelet on his right wrist.",
+  "response": "{\"facts\": [{\"path\": \"allergies\", \"value\": \"penicillin\", \"quote\": \"penicillin allergy bracelet\", \"confidence\": 1.0, \"hedged\": false}]}"
+}

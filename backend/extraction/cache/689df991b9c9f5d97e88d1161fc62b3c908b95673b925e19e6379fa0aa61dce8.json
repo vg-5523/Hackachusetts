@@ -1,0 +1,4 @@
+{
+  "text": "Administered 324 milligrams aspirin chewed at zero nine twenty one.",
+  "response": "{\"facts\": [{\"path\": \"meds_given\", \"value\": {\"drug\": \"aspirin\", \"dose\": \"324 milligrams\", \"route\": \"chewed\", \"time\": \"2024-02-02T09:21:00+00:00\"}, \"quote\": \"Administered 324 milligrams aspirin chewed at zero nine twenty one\", \"confidence\": 1.0, \"hedged\": false}]}"
+}

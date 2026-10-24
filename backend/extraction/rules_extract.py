@@ -53,15 +53,19 @@ _DEFAULT_DRUGS = (
 )
 
 # Chief-complaint keyword -> canonical value.
+# Each needle is matched with word boundaries, so short tokens cannot match
+# inside another word (e.g. "od" must not match inside "blood").
 _COMPLAINTS = (
     ("chest pain", "chest pain"),
+    ("chest pressure", "chest pain"),
     ("chest tightness", "chest pain"),
     ("stroke", "stroke symptoms"),
     ("facial droop", "stroke symptoms"),
     ("slurred speech", "stroke symptoms"),
     ("weakness on one side", "stroke symptoms"),
     ("overdose", "overdose"),
-    ("od", "overdose"),
+    ("overdosed", "overdose"),
+    ("od'd", "overdose"),
 )
 
 _ROUTES = {
@@ -148,12 +152,19 @@ def _extract_sex(text: str, out: list[Proposal]) -> None:
 
 
 def _extract_complaint(text: str, out: list[Proposal]) -> None:
-    lowered = text.lower()
     for needle, value in _COMPLAINTS:
-        idx = lowered.find(needle)
-        if idx != -1:
-            out.append(_mk("chief_complaint", value, text[idx : idx + len(needle)]))
+        m = re.search(rf"\b{re.escape(needle)}\b", text, flags=re.IGNORECASE)
+        if m:
+            out.append(_mk("chief_complaint", value, m.group(0)))
             return
+
+
+# Words that precede "allergy" but are not drugs; never treated as values.
+_ALLERGY_STOPWORDS = frozenset({
+    "no", "known", "drug", "the", "a", "an", "his", "her", "their", "any",
+    "that", "this", "medication", "med", "food", "environmental", "history",
+    "severe", "mild", "serious", "possible", "suspected", "reported",
+})
 
 
 def _extract_allergies(text: str, out: list[Proposal]) -> None:
@@ -165,7 +176,7 @@ def _extract_allergies(text: str, out: list[Proposal]) -> None:
         r"\ballergic to (\w+)\b|\b(\w+) allergy(?: bracelet)?\b", text, flags=re.IGNORECASE
     ):
         drug = (m.group(1) or m.group(2) or "").strip()
-        if drug and drug.lower() not in ("no", "known", "drug"):
+        if drug and drug.lower() not in _ALLERGY_STOPWORDS:
             out.append(_mk("allergies", drug.lower(), m.group(0)))
 
 

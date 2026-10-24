@@ -1,0 +1,4 @@
+{
+  "text": "She describes it as a heavy pressure behind the sternum, no radiation, some shortness of breath.",
+  "response": "{\"facts\": [{\"path\": \"chief_complaint\", \"value\": \"heavy pressure behind the sternum\", \"quote\": \"heavy pressure behind the sternum\", \"confidence\": 1.0, \"hedged\": false}, {\"path\": \"chief_complaint\", \"value\": \"shortness of breath\", \"quote\": \"shortness of breath\", \"confidence\": 1.0, \"hedged\": false}]}"
+}

@@ -1,0 +1,4 @@
+{
+  "text": "Gave him another aspirin to be sure, he wasn't certain he swallowed the first one.",
+  "response": "{\"facts\": [{\"path\": \"meds_given\", \"value\": {\"drug\": \"aspirin\"}, \"quote\": \"aspirin\", \"confidence\": 1.0, \"hedged\": false}]}"
+}

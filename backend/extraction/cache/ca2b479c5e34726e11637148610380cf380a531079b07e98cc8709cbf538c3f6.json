@@ -1,0 +1,4 @@
+{
+  "text": "First set of vitals: heart rate 96, blood pressure 150 over 92, SpO2 94 percent on room air, respiratory rate 22.",
+  "response": "{\"facts\": [{\"path\": \"vitals_timeline\", \"value\": {\"hr\": 96, \"bp\": \"150/92\", \"spo2\": 94, \"rr\": 22}, \"quote\": \"heart rate 96, blood pressure 150 over 92, SpO2 94 percent on room air, respiratory rate 22\", \"confidence\": 1.0, \"hedged\": false}]}"
+}

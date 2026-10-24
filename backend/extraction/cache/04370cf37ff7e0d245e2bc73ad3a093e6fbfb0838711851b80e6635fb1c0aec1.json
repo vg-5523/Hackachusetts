@@ -1,0 +1,4 @@
+{
+  "text": "Medic two en route with a 64 year old female, chief complaint chest pressure for the last half hour.",
+  "response": "{\"facts\": [{\"path\": \"sex\", \"value\": \"female\", \"quote\": \"female\", \"confidence\": 1.0, \"hedged\": false}, {\"path\": \"age\", \"value\": 64, \"quote\": \"64 year old\", \"confidence\": 1.0, \"hedged\": false}, {\"path\": \"chief_complaint\", \"value\": \"chest pressure for the last half hour\", \"quote\": \"chest pressure for the last half hour\", \"confidence\": 1.0, \"hedged\": false}]}"
+}

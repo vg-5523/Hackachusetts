@@ -1,0 +1,4 @@
+{
+  "text": "We are ten minutes out, ETA to the ED about fourteen twenty six, requesting cath lab activation.",
+  "response": "{\"facts\": [{\"path\": \"eta\", \"value\": \"2024-02-01T14:26:00+00:00\", \"quote\": \"fourteen twenty six\", \"confidence\": 0.95, \"hedged\": false}]}"
+}

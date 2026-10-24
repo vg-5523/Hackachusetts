@@ -1,0 +1,4 @@
+{
+  "text": "Twelve lead shows ST elevation in the inferior leads, we're calling this a STEMI, treating as a level one.",
+  "response": "{\"facts\": [{\"path\": \"suspected_condition\", \"value\": \"STEMI\", \"quote\": \"STEMI\", \"confidence\": 1.0, \"hedged\": false}, {\"path\": \"acuity_esi\", \"value\": 1, \"quote\": \"level one\", \"confidence\": 1.0, \"hedged\": false}]}"
+}

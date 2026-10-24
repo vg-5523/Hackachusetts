@@ -1,0 +1,4 @@
+{
+  "text": "Allergies: she is allergic to sulfa drugs only, nothing else, confirmed with her daughter.",
+  "response": "{\"facts\": [{\"path\": \"allergies\", \"value\": \"sulfa drugs\", \"quote\": \"sulfa drugs\", \"confidence\": 1.0, \"hedged\": false}]}"
+}

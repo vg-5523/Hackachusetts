@@ -1,0 +1,4 @@
+{
+  "text": "Repeat vitals: heart rate 90, blood pressure 142 over 88, SpO2 96 percent, respiratory rate 20.",
+  "response": "{\"facts\": [{\"path\": \"vitals_timeline\", \"value\": {\"ts\": \"2024-02-01T14:10:00+00:00\", \"hr\": 90, \"bp\": \"142/88\", \"spo2\": 96, \"rr\": 20}, \"quote\": \"Repeat vitals: heart rate 90, blood pressure 142 over 88, SpO2 96 percent, respiratory rate 20\", \"confidence\": 1.0, \"hedged\": false}]}"
+}

@@ -1,0 +1,4 @@
+{
+  "text": "Dispatch, medic one on scene with a 58 year old male, found sitting at the kitchen table clutching his chest.",
+  "response": "{\"facts\": [{\"path\": \"age\", \"value\": 58, \"quote\": \"58 year old\", \"confidence\": 1.0, \"hedged\": false}, {\"path\": \"sex\", \"value\": \"male\", \"quote\": \"male\", \"confidence\": 1.0, \"hedged\": false}, {\"path\": \"chief_complaint\", \"value\": \"clutching his chest\", \"quote\": \"clutching his chest\", \"confidence\": 1.0, \"hedged\": false}]}"
+}

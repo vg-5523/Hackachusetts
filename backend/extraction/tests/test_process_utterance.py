@@ -132,6 +132,10 @@ def test_no_key_no_cache_falls_back_to_rules(tmp_path, monkeypatch):
     falls back to the deterministic rules extractor."""
     monkeypatch.setattr(cache_mod, "CACHE_DIR", tmp_path)
     monkeypatch.delenv("LLM_API_KEY", raising=False)
+    # Stop a real repo-root .env from supplying a key via load_dotenv, so the
+    # no-key branch is exercised deterministically.
+    monkeypatch.setattr("backend.extraction.load_dotenv", lambda *a, **k: None)
+    monkeypatch.setattr("backend.llm.load_dotenv", lambda *a, **k: None)
 
     # Guard: call_llm must never be reached on this path.
     def _boom(prompt):  # pragma: no cover - should not be called

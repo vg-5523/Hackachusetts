@@ -1,0 +1,4 @@
+{
+  "text": "He's got crushing central chest pain radiating down the left arm, says it started about forty minutes ago while he was mowing the lawn.",
+  "response": "{\"facts\": [{\"path\": \"sex\", \"value\": \"male\", \"quote\": \"He's\", \"confidence\": 1.0, \"hedged\": false}, {\"path\": \"chief_complaint\", \"value\": \"crushing central chest pain radiating down the left arm\", \"quote\": \"crushing central chest pain radiating down the left arm\", \"confidence\": 1.0, \"hedged\": false}]}"
+}
