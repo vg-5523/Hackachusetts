@@ -26,9 +26,10 @@ function isEmptyValue(v: unknown): boolean {
 }
 
 function displayValue(v: unknown, status: FieldStatus, path: string): string {
-  // A conflicted field keeps its FIRST value, which for allergies is an
-  // empty list. Never render an empty conflicted value as "none" / dash:
-  // the conflict itself is the signal.
+  // A conflicted field shows its merged value (e.g. allergies ["penicillin"])
+  // with the red badge signalling the conflict; both source quotes appear in
+  // the provenance drawer. Only when a conflicted value is empty do we fall
+  // back to an explicit message so it is never rendered as "none" / dash.
   if (status === "conflicted" && isEmptyValue(v)) {
     if (path === "allergies") return "No allergies reported, but conflicting report";
     return "Conflicting report - see sources";
