@@ -1,0 +1,11 @@
+# TypeScript composite build artifacts
+.tsnode/
+*.tsbuildinfo
+
+# Build output (also covered at repo root)
+dist/
+
+# Local env
+.env
+.env.*
+!.env.example

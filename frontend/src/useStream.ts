@@ -6,12 +6,16 @@ export interface StreamState {
   record: PatientRecord | null;
   flags: Flag[];
   clocks: Clocks | null;
+  /** True once the stream has opened at least once and is currently live. */
   connected: boolean;
+  /** True while a reconnect is pending after a drop. */
+  reconnecting: boolean;
 }
 
 /**
  * Subscribes to GET /api/stream via EventSource and keeps the latest
- * `record`, `flags`, and `clocks` payloads. Reconnects automatically.
+ * `record`, `flags`, and `clocks` payloads. On a drop it shows a
+ * reconnecting state and retries after 2 seconds.
  */
 export function useStream(): StreamState {
   const [state, setState] = useState<StreamState>({
@@ -19,6 +23,7 @@ export function useStream(): StreamState {
     flags: [],
     clocks: null,
     connected: false,
+    reconnecting: false,
   });
   const esRef = useRef<EventSource | null>(null);
   const retryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -26,39 +31,46 @@ export function useStream(): StreamState {
   useEffect(() => {
     let closed = false;
 
+    const safe = <T,>(raw: string, apply: (v: T) => void) => {
+      try {
+        apply(JSON.parse(raw) as T);
+      } catch {
+        /* ignore malformed payload - never crash */
+      }
+    };
+
     const connect = () => {
       const es = openStream();
       esRef.current = es;
 
       es.addEventListener("open", () =>
-        setState((s) => ({ ...s, connected: true }))
+        setState((s) => ({ ...s, connected: true, reconnecting: false }))
       );
-      es.addEventListener("record", (e) => {
-        try {
-          const record = JSON.parse((e as MessageEvent).data) as PatientRecord;
-          setState((s) => ({ ...s, record }));
-        } catch { /* ignore malformed */ }
-      });
-      es.addEventListener("flags", (e) => {
-        try {
-          const flags = JSON.parse((e as MessageEvent).data) as Flag[];
-          setState((s) => ({ ...s, flags }));
-        } catch { /* ignore */ }
-      });
-      es.addEventListener("clocks", (e) => {
-        try {
-          const clocks = JSON.parse((e as MessageEvent).data) as Clocks;
-          setState((s) => ({ ...s, clocks }));
-        } catch { /* ignore */ }
-      });
+      es.addEventListener("record", (e) =>
+        safe<PatientRecord>((e as MessageEvent).data, (record) =>
+          setState((s) => ({ ...s, record }))
+        )
+      );
+      es.addEventListener("flags", (e) =>
+        safe<Flag[]>((e as MessageEvent).data, (flags) =>
+          setState((s) => ({ ...s, flags: Array.isArray(flags) ? flags : [] }))
+        )
+      );
+      es.addEventListener("clocks", (e) =>
+        safe<Clocks>((e as MessageEvent).data, (clocks) =>
+          setState((s) => ({ ...s, clocks }))
+        )
+      );
       es.addEventListener("error", () => {
-        setState((s) => ({ ...s, connected: false }));
+        // EventSource dropped. Mark reconnecting and retry after 2s.
         es.close();
-        if (!closed && retryRef.current == null) {
+        if (closed) return;
+        setState((s) => ({ ...s, connected: false, reconnecting: true }));
+        if (retryRef.current == null) {
           retryRef.current = setTimeout(() => {
             retryRef.current = null;
             if (!closed) connect();
-          }, 1000);
+          }, 2000);
         }
       });
     };

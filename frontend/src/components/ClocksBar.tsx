@@ -28,7 +28,13 @@ function Stat({
 }
 
 /** Top-bar live clocks. Ticks client-side between SSE `clocks` events. */
-export default function ClocksBar({ clocks }: { clocks: Clocks | null }) {
+export default function ClocksBar({
+  clocks,
+  reconnecting = false,
+}: {
+  clocks: Clocks | null;
+  reconnecting?: boolean;
+}) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -43,11 +49,17 @@ export default function ClocksBar({ clocks }: { clocks: Clocks | null }) {
     <div className="flex items-stretch">
       <div className="flex items-center gap-2.5 border-r border-line px-4 py-2.5">
         <span className="flex h-2 w-2 items-center justify-center">
-          <span className="h-1.5 w-1.5 animate-tick rounded-full bg-emerald-600" />
+          <span
+            className={`h-1.5 w-1.5 animate-tick rounded-full ${reconnecting ? "bg-amber-500" : "bg-emerald-600"}`}
+          />
         </span>
         <div className="flex flex-col gap-0.5 leading-none">
           <div className="text-lg font-semibold tracking-tight text-slate-900">Relay</div>
-          <div className="text-[9px] uppercase tracking-[0.2em] text-emerald-700">live · safety console</div>
+          <div
+            className={`text-[9px] uppercase tracking-[0.2em] ${reconnecting ? "text-amber-700" : "text-emerald-700"}`}
+          >
+            {reconnecting ? "reconnecting\u2026" : "live \u00b7 safety console"}
+          </div>
         </div>
       </div>
       <div className="flex divide-x divide-line">

@@ -7,9 +7,11 @@ import type {
   UtteranceRequest,
 } from "@shared/types";
 
-const BASE =
+const RAW_BASE =
   (import.meta.env.VITE_API_BASE as string | undefined) ??
   "http://localhost:8000";
+// Strip any trailing slash so ${BASE}/api/... never doubles the slash.
+const BASE = RAW_BASE.replace(/\/+$/, "");
 
 export const API_BASE = BASE;
 

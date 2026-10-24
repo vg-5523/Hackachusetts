@@ -16,7 +16,7 @@ const FIELDS: ReadonlyArray<readonly [string, string]> = [
 
 function val(r: PatientRecord | null, k: string): string {
   if (!r) return "";
-  const cell = (r as Record<string, { value?: unknown }>)[k];
+  const cell = (r as unknown as Record<string, { value?: unknown }>)[k];
   return cell && cell.value != null ? JSON.stringify(cell.value) : "";
 }
 

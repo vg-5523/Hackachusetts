@@ -19,12 +19,25 @@ const LABEL: Record<FieldStatus, string> = {
   unknown: "text-slate-500",
 };
 
-function displayValue(v: unknown): string {
-  if (v == null || v === "") return "—";
-  if (Array.isArray(v)) return v.length ? v.join(", ") : "—";
+function isEmptyValue(v: unknown): boolean {
+  if (v == null || v === "") return true;
+  if (Array.isArray(v)) return v.length === 0;
+  return false;
+}
+
+function displayValue(v: unknown, status: FieldStatus, path: string): string {
+  // A conflicted field keeps its FIRST value, which for allergies is an
+  // empty list. Never render an empty conflicted value as "none" / dash:
+  // the conflict itself is the signal.
+  if (status === "conflicted" && isEmptyValue(v)) {
+    if (path === "allergies") return "No allergies reported, but conflicting report";
+    return "Conflicting report - see sources";
+  }
+  if (v == null || v === "") return "\u2014";
+  if (Array.isArray(v)) return v.length ? v.join(", ") : "\u2014";
   if (typeof v === "object") {
     const o = v as Record<string, unknown>;
-    return Object.values(o).filter((x) => x != null && x !== "").join(" · ") || "—";
+    return Object.values(o).filter((x) => x != null && x !== "").join(" \u00b7 ") || "\u2014";
   }
   return String(v);
 }
@@ -66,7 +79,7 @@ export default function SourcedField({
       >
         <div className="min-w-0">
           <div className="text-[10px] uppercase tracking-[0.15lem] text-slate-500">{label}</div>
-          <div className="truncate font-mono text-sm text-slate-900">{displayValue(field.value)}</div>
+          <div className={`font-mono text-sm text-slate-900 ${status === "conflicted" ? "" : "truncate"}`}>{displayValue(field.value, status, path)}</div>
         </div>
         <span className="flex shrink-0 items-center gap-1.5" data-testid="badge">
           <span className={`h-1.5 w-1.5 ${DOT[status]}`} />

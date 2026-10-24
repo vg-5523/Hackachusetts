@@ -20,7 +20,7 @@ function nowStr(): string {
 }
 
 export default function App() {
-  const { record, flags, clocks } = useStream();
+  const { record, flags, clocks, reconnecting } = useStream();
   const [drawer, setDrawer] = useState<DrawerData | null>(null);
   const [transitions, setTransitions] = useState<
     Record<string, { relayed?: TransitionInfo; acked?: TransitionInfo }>
@@ -110,7 +110,7 @@ export default function App() {
   return (
     <>
       <Layout
-        topBar={<ClocksBar clocks={clocks} />}
+        topBar={<ClocksBar clocks={clocks} reconnecting={reconnecting} />}
         whatChanged={<WhatChanged text={whatChanged} />}
         left={
           <>
