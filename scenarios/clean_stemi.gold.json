@@ -1,0 +1,14 @@
+{
+  "fields": {
+    "age": { "value": "64", "status": "unverified" },
+    "sex": { "value": "female", "status": "unverified" },
+    "chief_complaint": { "value": "chest pressure behind the sternum", "status": "confirmed" },
+    "suspected_condition": { "value": "STEMI", "status": "confirmed" },
+    "allergies": { "value": ["sulfa"], "status": "confirmed" },
+    "meds_given": [
+      { "drug": "aspirin" }
+    ],
+    "acuity_esi": { "value": 1, "status": "confirmed" }
+  },
+  "flags": []
+}

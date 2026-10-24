@@ -1,0 +1,14 @@
+{
+  "fields": {
+    "age": { "value": "72", "status": "unverified" },
+    "sex": { "value": "male", "status": "unverified" },
+    "chief_complaint": { "value": "sudden weakness and slurred speech with right facial droop", "status": "confirmed" },
+    "suspected_condition": { "value": "acute stroke", "status": "confirmed" },
+    "allergies": { "value": [], "status": "unknown" },
+    "meds_given": [],
+    "acuity_esi": { "value": 2, "status": "confirmed" }
+  },
+  "flags": [
+    { "type": "missing_info", "severity": "info" }
+  ]
+}

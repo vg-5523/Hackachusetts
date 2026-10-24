@@ -1,0 +1,18 @@
+{
+  "fields": {
+    "age": { "value": "58", "status": "unverified" },
+    "sex": { "value": "male", "status": "unverified" },
+    "chief_complaint": { "value": "crushing central chest pain radiating to the left arm", "status": "confirmed" },
+    "suspected_condition": { "value": "STEMI", "status": "confirmed" },
+    "allergies": { "value": ["penicillin"], "status": "conflicted" },
+    "meds_given": [
+      { "drug": "aspirin" },
+      { "drug": "aspirin" }
+    ],
+    "acuity_esi": { "value": 1, "status": "confirmed" }
+  },
+  "flags": [
+    { "type": "contradiction", "severity": "critical" },
+    { "type": "duplicate_dose", "severity": "warn" }
+  ]
+}

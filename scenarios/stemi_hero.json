@@ -1,0 +1,12 @@
+[
+  { "text": "Dispatch, medic one on scene with a 58 year old male, found sitting at the kitchen table clutching his chest.", "ts": "2024-02-01T14:00:00+00:00" },
+  { "text": "He's got crushing central chest pain radiating down the left arm, says it started about forty minutes ago while he was mowing the lawn.", "ts": "2024-02-01T14:01:30+00:00" },
+  { "text": "First set of vitals: heart rate 96, blood pressure 150 over 92, SpO2 94 percent on room air, respiratory rate 22.", "ts": "2024-02-01T14:03:00+00:00" },
+  { "text": "Patient reports no known allergies, no cardiac history that he's aware of.", "ts": "2024-02-01T14:04:00+00:00" },
+  { "text": "Twelve lead shows ST elevation in the inferior leads, we're calling this a STEMI, treating as a level one.", "ts": "2024-02-01T14:05:30+00:00" },
+  { "text": "Giving 324 aspirin chewed now.", "ts": "2024-02-01T14:06:00+00:00" },
+  { "text": "Repeat vitals: heart rate 90, blood pressure 142 over 88, SpO2 96 percent, respiratory rate 20.", "ts": "2024-02-01T14:10:00+00:00" },
+  { "text": "Correction on the allergy history, patient has a penicillin allergy bracelet on his right wrist.", "ts": "2024-02-01T14:12:00+00:00" },
+  { "text": "Gave him another aspirin to be sure, he wasn't certain he swallowed the first one.", "ts": "2024-02-01T14:16:00+00:00" },
+  { "text": "We are ten minutes out, ETA to the ED about fourteen twenty six, requesting cath lab activation.", "ts": "2024-02-01T14:16:30+00:00" }
+]

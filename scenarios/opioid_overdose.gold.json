@@ -1,0 +1,18 @@
+{
+  "fields": {
+    "age": { "value": "30", "status": "unverified" },
+    "sex": { "value": "male", "status": "unverified" },
+    "chief_complaint": { "value": "unresponsive with respiratory depression, suspected opioid overdose", "status": "confirmed" },
+    "suspected_condition": { "value": "opioid overdose", "status": "unverified" },
+    "allergies": { "value": [], "status": "unknown" },
+    "meds_given": [
+      { "drug": "naloxone" },
+      { "drug": "naloxone" }
+    ],
+    "acuity_esi": { "value": 1, "status": "confirmed" }
+  },
+  "flags": [
+    { "type": "duplicate_dose", "severity": "warn" },
+    { "type": "missing_info", "severity": "info" }
+  ]
+}

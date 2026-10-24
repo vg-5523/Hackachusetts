@@ -1,0 +1,14 @@
+{
+  "fields": {
+    "age": { "value": "40s", "status": "unverified" },
+    "sex": { "value": "male", "status": "unverified" },
+    "chief_complaint": { "value": "possible abdominal or chest pain", "status": "unverified" },
+    "suspected_condition": { "value": null, "status": "unknown" },
+    "allergies": { "value": [], "status": "unknown" },
+    "meds_given": [],
+    "acuity_esi": { "value": null, "status": "unknown" }
+  },
+  "flags": [
+    { "type": "missing_info", "severity": "info" }
+  ]
+}
