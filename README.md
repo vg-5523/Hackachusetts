@@ -28,7 +28,7 @@ The table combines the original account-based responsibilities with the team's i
 
 | Team member | Role | Responsibilities |
 |---|---|---|
-| **Vrishin Gera — Account D** | Lead Developer / Primary Programmer | Implement and integrate functionality across the application; maintain event logging and replay; generate handoff outputs; build synthetic scenarios and evaluations; troubleshoot and test the end-to-end workflow. Main assigned areas: backend/store/, backend/outputs/, scenarios/, and eval/. |
+| **Vrishin Gera — Account D** | Primary Programmer | Implement and integrate functionality across the application; maintain event logging and replay; generate handoff outputs; build synthetic scenarios and evaluations; troubleshoot and test the end-to-end workflow. Main assigned areas: backend/store/, backend/outputs/, scenarios/, and eval/. |
 | **Sai Srinath — Account A** | Extraction and AI integration | Convert utterances into structured patient facts; verify supporting quotes; work on extraction prompts, cached responses, and the rules-based fallback. Main area: backend/extraction/. |
 | **Jenil Vyas — Account B** | Safety engine | Build deterministic safety checks, medication-name normalization, curated rules, flag evidence, and suggested relay phrasing. Main area: backend/safety/. |
 | **Ruhan Vikram — Account C** | Frontend and operator experience | Build the React dashboard, typed and microphone input, live record updates, evidence views, flag interactions, and output panels. Main area: frontend/. |
