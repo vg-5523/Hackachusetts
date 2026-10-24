@@ -22,6 +22,6 @@ frontend/dist/
 
 # Event log (runtime data)
 backend/store/event_log.json
-'n.venv311/
 .venv311/
 .verify_venv/
+.hypothesis/

@@ -1,0 +1,292 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 `backend/store/validate.py` — `validate_event(event)`: kind in allowed set, payload matches that kind's shape; errors name field + reason. _Requirements: 1.6_": [
+      {
+        "executionId": "a9179fd1-fa07-4193-9df6-bfcb3128bfe5",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792865187918
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792865332712
+      }
+    ],
+    "1.2 `backend/store/persist.py` — `save(events, path)` atomic (tmp + `os.replace`), `load(path)->list[Event]`, corrupt file raises; default path `backend/store/event_log.json` (gitignored). _Requirements: 1.4, 1.5_": [
+      {
+        "executionId": "a9179fd1-fa07-4193-9df6-bfcb3128bfe5",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792865189767
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792865334574
+      }
+    ],
+    "2.1 `backend/outputs/sbar.py` — deterministic S/B/A/R from record + open flags; label unverified/conflicted; `\"\"` when empty. _Requirements: 4.1, 4.4, 4.5, 4.6_": [
+      {
+        "executionId": "a9179fd1-fa07-4193-9df6-bfcb3128bfe5",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792865191669
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792865892965
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792866623612
+      }
+    ],
+    "2.3 `backend/outputs/checklist.py` — condition-keyed table (STEMI: defib, crash cart, 12-lead ECG, cath lab; stroke: CT slot, last-known-well); `[]` when nothing applies. _Requirements: 4.1, 4.2, 4.3, 4.6_": [
+      {
+        "executionId": "a9179fd1-fa07-4193-9df6-bfcb3128bfe5",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792865193582
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792865336932
+      }
+    ],
+    "7.1 Create a Kiro agent hook in `.kiro/hooks/` that triggers on save of `shared/schema.py` or `shared/types.ts` and runs the mock typecheck (`python eval/gen_mock_typecheck.py` then `tsc -p eval/tsconfig.mock.json`); hook watches `shared/` but lives in `.kiro/hooks/` and runs eval tooling only. _Requirements: 8, contract check_": [
+      {
+        "executionId": "a9179fd1-fa07-4193-9df6-bfcb3128bfe5",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792865195534
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792865339297
+      }
+    ],
+    "7. Agent hook": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792865339373
+      }
+    ],
+    "2.2 `backend/outputs/pre_alert.py` — short ED pre-alert from key fields + critical flags; `\"\"` when empty. _Requirements: 4.1, 4.4, 4.5, 4.6_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792865347659
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792866624904
+      }
+    ],
+    "1.3 `backend/store/log.py` — `append(event)`: validate, reject duplicate id, persist, then append in memory (all-or-nothing); `events()` oldest-first. _Requirements: 1.1, 1.6_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792866630121
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792867498092
+      }
+    ],
+    "1.4 `backend/store/derive.py` — `apply_event` + `derive` fold from `(PatientRecord(),[])`, no input mutation; conflict rules (empty->unverified; same value add source dedupe utterance_id+quote; different value keep old + add source + conflicted); meds_given/vitals_timeline append; flag status stability; relay/ack/field_confirmed set status. _Requirements: 1.2, 1.3, 2.1, 2.2, 2.3, 2.4, 2.5_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792866632918
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792867501385
+      }
+    ],
+    "1.6 `backend/store/broadcast.py` — `publish(kind,data)` + async `subscribe()` over per-subscriber `asyncio.Queue`, drop on close. _Requirements: 1.7_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792866634823
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792867502800
+      }
+    ],
+    "2.4 `backend/outputs/__init__.py` — re-export the three with Phase 1 signatures. _Requirements: 4.1_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792866636284
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792867504266
+      }
+    ],
+    "2. Outputs": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792867504335
+      }
+    ],
+    "1.5 `backend/store/facts.py` — `facts_from(utt, old, new)`: diff to fact events (unique ids, UTC ms ts), drop any fact whose quote is not a substring of `utt.text`. _Requirements: 1.2_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792867509814
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792867619257
+      }
+    ],
+    "1.7 `backend/store/__init__.py` — wire public `append`/`events`/`derive`/`facts_from`/`subscribe` (keep Phase 1 signatures); replay `event_log.json` on startup. _Requirements: 1.1, 1.2, 1.5, 1.7_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792867620922
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792868660323
+      }
+    ],
+    "1. Store": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792868660438
+      }
+    ],
+    "3.1 Add `SCRIBE_MODE=stub|live` (default stub); stub path unchanged so stub tests pass. _Requirements: 3.1, 3.2_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792868664744
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792868803951
+      }
+    ],
+    "3.2 Live mode: GET record/flags/events from `store.derive(store.events())`; `POST /api/utterance` runs validate->append utterance->process_utterance->facts_from->append facts->evaluate->append flag_raised(new ids)->broadcast; failure before append -> 500 `processing`. _Requirements: 3.3, 3.4_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792868806338
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792869037731
+      }
+    ],
+    "3.3 `POST /api/scenario/{id}/play` streams `scenarios/{id}.json` through the pipeline with `asyncio.sleep` delays; unknown id -> 404; stub mode keeps no-side-effect behavior. _Requirements: 3.5, 3.6_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792869035483
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792869709388
+      }
+    ],
+    "3. main.py SCRIBE_MODE": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792869709489
+      }
+    ],
+    "5.1 `eval/run_scenarios.py` — play every scenario, score per-field accuracy + flag precision/recall vs gold, print table, write `eval/report.md`. _Requirements: 6.1, 6.2, 6.3_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792869715226
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792870824098
+      }
+    ],
+    "6.1 Fix `eval/tests/test_stub_smoke.py` SSE test to read exactly 3 events then close. _Requirements: 7.1, 7.2_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792869716733
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792870825675
+      }
+    ],
+    "5. Eval": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792870824156
+      }
+    ],
+    "6.2 `backend/store/tests/test_roundtrip_property.py` — Hypothesis schema JSON round-trip. **Property 1: Schema JSON round-trip** _Requirements: 8.1_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792870830066
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792871139126
+      }
+    ],
+    "6.3 `backend/store/tests/test_replay_property.py` — Hypothesis replay equals live. **Property 2: Replay equals live derivation** _Requirements: 8.2_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792870831908
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792871140976
+      }
+    ],
+    "6.4 `backend/store/tests/test_flag_state_machine.py` — Hypothesis flag state machine (200/409/404 + stability). **Property 3: Flag state machine** _Requirements: 8.3, 2.5_": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792870833399
+      },
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792871142498
+      }
+    ],
+    "6. Tests": [
+      {
+        "executionId": "095820ef-e207-4979-b45c-89ac6d0b64de",
+        "chatSessionId": "sess_a7cdbb7e-7601-443d-8355-d96ccb830e5e",
+        "timestamp": 1792871142588
+      }
+    ]
+  }
+}
