@@ -25,3 +25,4 @@ backend/store/event_log.json
 .venv311/
 .verify_venv/
 .hypothesis/
+.vscode/
