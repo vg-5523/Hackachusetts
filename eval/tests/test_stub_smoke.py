@@ -15,12 +15,14 @@ SSE test reads only a bounded number of lines so it can never hang.
 
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime, timezone
 
 import pytest
+from fastapi import Request
 from fastapi.testclient import TestClient
 
-from backend.main import app, state
+from backend.main import app, state, stream
 from shared.schema import (
     Event,
     FieldStatus,
@@ -186,33 +188,102 @@ def test_confirm_age_field(client: TestClient) -> None:
 # ---------------------------------------------------------------------------
 
 
+def _parse_sse_event_names(frame_text: str, into: list[str]) -> None:
+    """Append every SSE ``event:`` name found in ``frame_text`` to ``into``.
+
+    A single yielded frame is ``event: <name>\\ndata: <json>\\n\\n``; splitting
+    on newlines and keeping the lines that start with ``event:`` recovers the
+    event name regardless of how frames are chunked together.
+    """
+    for line in frame_text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("event:"):
+            into.append(stripped[len("event:") :].strip())
+
+
+async def _collect_initial_stream_events(max_frames: int = 12) -> tuple[int, str, list[str]]:
+    """Drive the real ``/api/stream`` generator and collect its opening events.
+
+    Why not ``client.stream(...)``? The pinned ``starlette`` ``TestClient`` is
+    not truly streaming: its transport runs the ASGI app to completion and
+    buffers the whole body before handing back a response, so a request against
+    an endpoint that streams forever deadlocks on entry — the server generator
+    only ends on client disconnect, but the harness only signals disconnect once
+    the generator has ended. There is no client-side bounded read that escapes
+    that loop.
+
+    Instead we exercise the endpoint's own async generator directly against a
+    real :class:`~fastapi.Request`. The request's ASGI ``receive`` reports
+    ``http.disconnect`` immediately, so ``request.is_disconnected()`` is true the
+    first time the steady-state loop checks it: the generator yields its three
+    initial frames (``record``, ``flags``, ``clocks``) and then exits on the very
+    next iteration instead of settling into the 1 s ``clocks`` cadence. This runs
+    the genuine endpoint code — no mocks, no fakes — and cannot hang.
+
+    Returns the HTTP status code, the ``content-type`` header, and the ordered
+    list of SSE event names observed.
+    """
+
+    async def receive() -> dict[str, str]:
+        # A disconnected client: the generator's ``is_disconnected()`` check
+        # returns True on its first steady-state iteration, so it stops after the
+        # initial burst rather than streaming ``clocks`` forever.
+        return {"type": "http.disconnect"}
+
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/api/stream",
+        "headers": [],
+        "query_string": b"",
+    }
+    request = Request(scope, receive)
+
+    response = await stream(request)
+
+    status_code = response.status_code
+    content_type = response.headers.get("content-type", "")
+
+    seen_events: list[str] = []
+    frames = 0
+    # Hard safety bound on frames so even a misbehaving generator cannot loop
+    # forever; the initial burst is three frames, well under the cap.
+    async for chunk in response.body_iterator:
+        text = chunk.decode() if isinstance(chunk, bytes) else chunk
+        _parse_sse_event_names(text, seen_events)
+        frames += 1
+        if len(seen_events) >= 3 or frames >= max_frames:
+            break
+
+    # Close the generator so it cannot keep running after we stop reading.
+    aclose = getattr(response.body_iterator, "aclose", None)
+    if aclose is not None:
+        await aclose()
+
+    return status_code, content_type, seen_events
+
+
 def test_stream_emits_initial_record_flags_clocks(client: TestClient) -> None:
     """``GET /api/stream`` → 200 ``text/event-stream`` with the initial burst.
 
-    The stream emits a ``clocks`` event every second forever, so this test must
-    never read it unboundedly. It reads at most ``MAX_LINES`` lines, records the
-    SSE ``event:`` names in order until it has seen the three initial events,
-    then breaks and closes the stream. It asserts the content type and that the
-    first three event types are exactly ``record``, ``flags``, ``clocks`` in
-    order.
+    The endpoint emits ``record``, ``flags``, ``clocks`` on connect and then a
+    ``clocks`` event once per second forever. This test reads only the three
+    initial events and then stops, so it can never hang on the periodic cadence.
+
+    It drives the real endpoint generator via :func:`_collect_initial_stream_events`
+    (see that helper for why ``client.stream`` would deadlock under the pinned
+    test harness) and asserts a 200 status, a ``text/event-stream`` content type,
+    that at least three events were seen, and that the first three are exactly
+    ``record``, ``flags``, ``clocks`` in order.
+
+    The ``client`` fixture is requested so server state is reset first, keeping
+    this test consistent with the rest of the file.
     """
-    max_lines = 50
-    seen_events: list[str] = []
+    status_code, content_type, seen_events = asyncio.run(
+        asyncio.wait_for(_collect_initial_stream_events(), timeout=10)
+    )
 
-    with client.stream("GET", "/api/stream") as response:
-        assert response.status_code == 200
-        assert response.headers["content-type"].startswith("text/event-stream")
-
-        for line_number, line in enumerate(response.iter_lines()):
-            if line_number >= max_lines:
-                break
-            # ``iter_lines`` yields str for a text stream; normalize defensively.
-            text = line.decode() if isinstance(line, bytes) else line
-            if text.startswith("event:"):
-                seen_events.append(text[len("event:") :].strip())
-            # Stop as soon as the initial burst has been observed so we never
-            # fall into the steady 1 s ``clocks`` cadence.
-            if len(seen_events) >= 3:
-                break
-
+    assert status_code == 200
+    assert content_type.startswith("text/event-stream")
+    assert len(seen_events) >= 3
     assert seen_events[:3] == ["record", "flags", "clocks"]

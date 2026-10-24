@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Schema TS parity check",
+  "description": "When shared/schema.py or shared/types.ts is saved, regenerate the mock typecheck and run tsc --noEmit so the hand-written types.ts stays in sync with schema.py.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": ["shared/schema.py", "shared/types.ts"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "shared/schema.py or shared/types.ts changed. Run `python eval/gen_mock_typecheck.py` to regenerate eval/mock_typecheck.ts, then run `frontend/node_modules/.bin/tsc --noEmit -p eval/tsconfig.mock.json` (Windows: frontend\\node_modules\\.bin\\tsc.cmd). Report pass (exit 0, no output) or fail (type errors), and if it failed summarize the schema.py vs types.ts drift. Do not edit shared/ to fix it; report the drift."
+  }
+}

@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, TypeVar
@@ -32,6 +33,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from backend import store
 from backend.outputs import make_checklist, make_pre_alert, make_sbar
 from shared.schema import (
     ErrorBody,
@@ -43,6 +45,27 @@ from shared.schema import (
     Utterance,
     UtteranceRequest,
 )
+
+# ---------------------------------------------------------------------------
+# SCRIBE_MODE: stub (default) vs live (Task 3.1 — Req 3.1, 3.2)
+# ---------------------------------------------------------------------------
+
+# ``SCRIBE_MODE`` selects the pipeline behavior and defaults to ``stub`` so an
+# unset environment keeps the exact Phase 1 mock behavior and the existing stub
+# tests pass untouched (Req 3.1, 3.2). It is read once, at import time, and
+# normalized (trim + lowercase) so values like ``"Live"`` or ``" live "`` are
+# accepted. Anything other than ``"live"`` is treated as stub.
+#
+# This task (3.1) wires only the mode flag and the live-mode startup replay.
+# The utterance pipeline (3.2) and scenario play (3.3) branch on ``_is_live()``
+# at the clearly marked endpoint sections below; stub behavior stays as-is.
+SCRIBE_MODE = os.environ.get("SCRIBE_MODE", "stub").strip().lower()
+
+
+def _is_live() -> bool:
+    """Return ``True`` only in live mode; stub is the default for any other value."""
+    return SCRIBE_MODE == "live"
+
 
 # ---------------------------------------------------------------------------
 # App + CORS
@@ -59,7 +82,8 @@ ALLOWED_ORIGINS: list[str] = [
 ]
 
 app = FastAPI(
-    title="Ambulance Scribe + Safety Check (stub)",
+    # The current mode is surfaced harmlessly in the title (no new routes).
+    title=f"Ambulance Scribe + Safety Check ({SCRIBE_MODE})",
     version="0.1.0",
     description=(
         "Phase 1 stub serving synthetic mock data. Decision support, not "
@@ -132,8 +156,17 @@ state = ServerState()
 
 @app.on_event("startup")
 def _load_state_on_startup() -> None:
-    """Re-copy the mock into the in-memory state when the app starts."""
+    """Prepare in-memory state when the app starts.
+
+    Stub mode (the default) re-copies the pristine mock into ``state`` exactly
+    as in Phase 1, so stub behavior is unchanged. Live mode additionally
+    replays the persisted Event_Log from disk into the Store's in-memory log
+    (Req 1.5, 3.1); the ``backend.store`` import above does no I/O, so this is
+    the first and only point disk is touched, and only under live mode.
+    """
     state.reset()
+    if _is_live():
+        store.load_from_disk()
 
 
 # ---------------------------------------------------------------------------
@@ -311,7 +344,14 @@ def get_record() -> JSONResponse:
     The body is validated against ``PatientRecord`` before being sent, so a
     schema regression surfaces as a 500 ``response_validation`` rather than a
     malformed body reaching the client.
+
+    Live mode (Task 3.2) derives the current record from the Store's Event_Log
+    (the single source of truth) instead of reading the in-memory mock; stub
+    mode is unchanged.
     """
+    if _is_live():
+        record, _ = store.derive(store.events())
+        return validate_response(record, PatientRecord)
     return validate_response(state.record, PatientRecord)
 
 
@@ -320,7 +360,13 @@ def get_flags() -> JSONResponse:
     """Return the current list of safety :class:`Flag`s (Req 7.3, 9.1).
 
     Each item is validated against ``Flag`` before sending (Req 9.12, 9.13).
+
+    Live mode (Task 3.2) derives the current flags from the Store's Event_Log;
+    stub mode is unchanged.
     """
+    if _is_live():
+        _, flags = store.derive(store.events())
+        return validate_response_list(flags, Flag)
     return validate_response_list(state.flags, Flag)
 
 
@@ -331,7 +377,14 @@ def get_sbar() -> JSONResponse:
     The body is a plain ``str`` (not a schema model), so it is returned
     directly with a 200 status. ``make_sbar`` reads the in-memory record and
     flags; the Phase 1 stub performs no LLM calls.
+
+    Live mode (Task 3.2) feeds ``make_sbar`` the record and flags derived from
+    the Store's Event_Log; stub mode is unchanged.
     """
+    if _is_live():
+        record, flags = store.derive(store.events())
+        sbar = make_sbar(record, flags)
+        return JSONResponse(status_code=200, content=sbar)
     sbar = make_sbar(state.record, state.flags)
     return JSONResponse(status_code=200, content=sbar)
 
@@ -341,7 +394,14 @@ def get_pre_alert() -> JSONResponse:
     """Return the ED pre-alert text as a JSON string (Req 7.10).
 
     The body is a plain ``str``; it is returned directly with a 200 status.
+
+    Live mode (Task 3.2) feeds ``make_pre_alert`` the record and flags derived
+    from the Store's Event_Log; stub mode is unchanged.
     """
+    if _is_live():
+        record, flags = store.derive(store.events())
+        pre_alert = make_pre_alert(record, flags)
+        return JSONResponse(status_code=200, content=pre_alert)
     pre_alert = make_pre_alert(state.record, state.flags)
     return JSONResponse(status_code=200, content=pre_alert)
 
@@ -352,7 +412,14 @@ def get_checklist() -> JSONResponse:
 
     The body is a plain ``list[str]``; it is returned directly with a 200
     status.
+
+    Live mode (Task 3.2) feeds ``make_checklist`` the record derived from the
+    Store's Event_Log; stub mode is unchanged.
     """
+    if _is_live():
+        record, _ = store.derive(store.events())
+        checklist = make_checklist(record)
+        return JSONResponse(status_code=200, content=checklist)
     checklist = make_checklist(state.record)
     return JSONResponse(status_code=200, content=checklist)
 
@@ -462,17 +529,124 @@ def get_events() -> JSONResponse:
     The stub has no real Event_Log yet, so events are synthesized from the mock
     record and flags. Every item is validated against ``Event`` before sending
     (Req 9.12, 9.13).
+
+    Live mode (Task 3.2) returns the real Event_Log from the Store (oldest
+    first) rather than a synthesized one; stub mode is unchanged.
     """
+    if _is_live():
+        return validate_response_list(store.events(), Event)
     events = _synthesize_events(state.record, state.flags)
     return validate_response_list(events, Event)
 
 # --- Task 4.3: POST /api/utterance + scenario endpoints ----------------------
 #   POST /api/utterance, GET /api/scenarios, POST /api/scenario/{id}/play
 
-# The known scenario ids. The Phase 1 stub ships a single canned scenario; the
-# same fixed set backs both ``GET /api/scenarios`` (which lists it) and the
-# play endpoint's known-id check, so the list and the 404 boundary never drift.
+# The known STUB scenario ids. Stub mode ships a single canned scenario; this
+# fixed set backs both ``GET /api/scenarios`` (which lists it) and the stub play
+# endpoint's known-id check, so the stub list and the stub 404 boundary never
+# drift and the existing stub smoke test ("stemi_hero" in the list; play
+# stemi_hero -> 200; play unknown -> 404) keeps passing unchanged.
 SCENARIO_IDS: list[str] = ["stemi_hero"]
+
+# ---------------------------------------------------------------------------
+# Live scenario corpus (Task 3.3 — Req 3.5, 3.6)
+# ---------------------------------------------------------------------------
+
+# Scenario transcripts are authored by another branch (b-scenarios) under
+# ``scenarios/<id>.json`` at the repository root. They may not have landed yet,
+# so every lookup below tolerates a missing directory or file. ``.gold.json``
+# companions (expected fields/flags per Req 5.4) are NOT playable scenarios and
+# are excluded from listings.
+SCENARIOS_DIR = REPO_ROOT / "scenarios"
+
+# Per-utterance streaming delay (seconds) between scenario utterances so SSE
+# subscribers observe incremental updates. Overridable via
+# ``SCENARIO_PLAY_DELAY_S`` (tests set it to ``0`` to run without waiting). It
+# is read per-call (not cached at import) so a test can set the env var before
+# driving the endpoint.
+_DEFAULT_SCENARIO_PLAY_DELAY_S = 0.3
+
+
+def _scenario_play_delay_s() -> float:
+    """Return the inter-utterance streaming delay in seconds (Req 3.5).
+
+    Reads ``SCENARIO_PLAY_DELAY_S`` each call and falls back to
+    ``_DEFAULT_SCENARIO_PLAY_DELAY_S`` (0.3s) when unset or unparseable. A
+    negative value is clamped to ``0`` so the delay is never used as a
+    (nonsensical) negative sleep.
+    """
+    raw = os.environ.get("SCENARIO_PLAY_DELAY_S")
+    if raw is None:
+        return _DEFAULT_SCENARIO_PLAY_DELAY_S
+    try:
+        value = float(raw)
+    except ValueError:
+        return _DEFAULT_SCENARIO_PLAY_DELAY_S
+    return value if value > 0 else 0.0
+
+
+def _available_scenario_ids() -> list[str]:
+    """List playable scenario ids from ``scenarios/*.json`` (Req 3.5).
+
+    An id is the stem of a ``scenarios/*.json`` file that is NOT a
+    ``*.gold.json`` companion. Returns ``[]`` when the directory is missing
+    (b-scenarios has not landed) rather than raising, so the endpoint never
+    crashes on a fresh checkout. Ids are sorted for a stable, deterministic
+    listing.
+    """
+    if not SCENARIOS_DIR.is_dir():
+        return []
+    ids: list[str] = []
+    for path in SCENARIOS_DIR.glob("*.json"):
+        # ``foo.gold.json`` has suffixes [".gold", ".json"]; skip those.
+        if path.name.endswith(".gold.json"):
+            continue
+        ids.append(path.stem)
+    return sorted(ids)
+
+
+def _scenario_path(scenario_id: str) -> Path:
+    """Resolve the on-disk transcript path for ``scenario_id``."""
+    return SCENARIOS_DIR / f"{scenario_id}.json"
+
+
+def _load_scenario_utterances(scenario_id: str) -> list[UtteranceRequest]:
+    """Load ``scenarios/{id}.json`` and normalize it to a list of utterances.
+
+    Tolerates BOTH shapes b-scenarios may write (Req 5.1 and the agreed loader
+    contract):
+
+    - a bare JSON list of utterances: ``[{"text": ..., "ts": ...}, ...]``;
+    - an object ``{"id": ..., "utterances": [{"text": ..., "ts": ...}, ...]}``.
+
+    Detection: if the parsed JSON is a list, use it directly; if it is a dict
+    with an ``"utterances"`` key, use that list. Each item is validated as an
+    :class:`UtteranceRequest` so a malformed utterance (missing/empty text,
+    missing/mistyped ts) raises here. Raises ``FileNotFoundError`` when the file
+    is absent (the caller maps that to 404) and ``ValueError`` for any other
+    malformed shape (mapped to 500 ``processing`` by the caller).
+    """
+    path = _scenario_path(scenario_id)
+    if not path.exists():
+        raise FileNotFoundError(f"no such scenario file: {path}")
+
+    with path.open(encoding="utf-8") as handle:
+        data = json.load(handle)
+
+    if isinstance(data, list):
+        raw_utterances = data
+    elif isinstance(data, dict) and "utterances" in data:
+        raw_utterances = data["utterances"]
+    else:
+        raise ValueError(
+            "scenario file must be a list of utterances or an object with an "
+            "'utterances' list"
+        )
+
+    if not isinstance(raw_utterances, list):
+        raise ValueError("scenario 'utterances' must be a JSON list")
+
+    return [UtteranceRequest.model_validate(item) for item in raw_utterances]
 
 
 @app.post("/api/utterance")
@@ -488,28 +662,208 @@ def post_utterance(body: UtteranceRequest) -> JSONResponse:
     valid input it returns the current mock :class:`PatientRecord` unchanged,
     validated before sending (Req 9.17).
     """
+    # TASK 3.2 (Req 3.3, 3.4): live mode runs the real pipeline below; stub mode
+    # keeps the no-op, no-side-effect behavior.
+    if _is_live():
+        return _post_utterance_live(body)
     return validate_response(state.record, PatientRecord)
+
+
+def _run_live_utterance(text: str, ts: Any) -> None:
+    """Run the live pipeline for ONE utterance, appending its events in order.
+
+    This is the reusable core shared by ``POST /api/utterance`` (Task 3.2) and
+    scenario play (Task 3.3). Steps (Req 3.3, 3.4):
+
+    1. Build an :class:`Utterance` with a deterministic id derived from the
+       current event count (``f"utt-{len(store.events())}"``).
+    2. Derive the current record from the Store's Event_Log.
+    3. Run the extraction stub ``process_utterance(utt, old_record) -> new``.
+    4. Compute the ``fact`` events from the record diff (``store.facts_from``).
+    5. Run the safety stub ``evaluate(new_record) -> flags`` and keep only the
+       flags whose id is NOT already present in the currently-derived flags.
+    6. Assemble the events to append IN ORDER: the ``utterance`` event, then the
+       fact events, then one ``flag_raised`` event per new flag.
+
+    Everything that can raise (steps 1-6) happens BEFORE any ``store.append``,
+    so a failure there leaves the Event_Log untouched. Only once the full
+    ordered batch is assembled do we append; ``store.append`` persists and
+    broadcasts each event.
+
+    ``text`` / ``ts`` are validated here by constructing an :class:`Utterance`,
+    so an invalid utterance raises before anything is appended. Callers that
+    need the all-or-nothing boundary (both of them) wrap this in try/except and
+    map a raise to 500 ``processing``.
+    """
+    # Lazy import keeps module import stub-safe and avoids import-time coupling
+    # to the extraction/safety packages (Req 9.14: no network at import).
+    from backend import extraction, safety
+
+    # (a)/(b) Build the Utterance with a deterministic, event-count-derived id.
+    # Constructing the model validates text/ts against the schema.
+    utt = Utterance(
+        id=f"utt-{len(store.events())}",
+        text=text,
+        ts=ts,
+    )
+
+    # (c) Current record + flags from the Store (single source of truth).
+    old_record, old_flags = store.derive(store.events())
+
+    # (d) Extraction stub: returns the record (unchanged in Phase 1).
+    new_record = extraction.process_utterance(utt, old_record)
+
+    # (e) Diff old vs new into deterministic ``fact`` events.
+    fact_events = store.facts_from(utt, old_record, new_record)
+
+    # (f) Safety stub: cited flags for the new record (empty in Phase 1).
+    flags = safety.evaluate(new_record)
+
+    # (g) Assemble the ordered append batch: utterance first, then facts,
+    # then one flag_raised per NEW flag id (not already present).
+    existing_flag_ids = {flag.id for flag in old_flags}
+    pending: list[Event] = [
+        Event(
+            id=utt.id,
+            ts=utt.ts,
+            kind="utterance",
+            payload={"utterance": utt.model_dump(mode="json")},
+        )
+    ]
+    pending.extend(fact_events)
+    new_flag_index = 0
+    for flag in flags:
+        if flag.id in existing_flag_ids:
+            continue
+        pending.append(
+            Event(
+                id=f"{utt.id}:flag:{new_flag_index}",
+                ts=utt.ts,
+                kind="flag_raised",
+                payload={"flag": flag.model_dump(mode="json")},
+            )
+        )
+        new_flag_index += 1
+
+    # (h) Append-last: persist + broadcast the batch in order. ``store.append``
+    # is all-or-nothing per event; the batch was fully built above so the first
+    # append (the utterance event) always runs.
+    for event in pending:
+        store.append(event)
+
+
+def _post_utterance_live(body: UtteranceRequest) -> JSONResponse:
+    """Run the live utterance pipeline with append-last, all-or-nothing semantics.
+
+    Delegates the per-utterance work to :func:`_run_live_utterance`. Everything
+    that can raise happens before the first append inside that helper, so a
+    failure leaves the Event_Log untouched and surfaces here as 500
+    ``processing`` (Req 3.4). On success the response is the record derived from
+    the Store after the appends.
+    """
+    try:
+        _run_live_utterance(body.text, body.ts)
+    except Exception as exc:  # noqa: BLE001 - any pre-append failure is 500
+        # Nothing has been appended yet, so the Event_Log is untouched.
+        return error_response(
+            status_code=500,
+            category="processing",
+            detail=f"failed to process utterance: {exc}",
+        )
+
+    rec, _ = store.derive(store.events())
+    return validate_response(rec, PatientRecord)
 
 
 @app.get("/api/scenarios")
 def get_scenarios() -> JSONResponse:
-    """Return the fixed list of known scenario ids as a JSON ``string[]`` (Req 7.13).
+    """Return the list of known scenario ids as a JSON ``string[]`` (Req 7.13, 3.5).
+
+    Stub mode (the default) returns the fixed :data:`SCENARIO_IDS`, so the
+    existing stub smoke test ("stemi_hero" in the list) keeps passing regardless
+    of whether the ``scenarios/`` corpus has landed. Live mode lists the real
+    playable transcripts discovered under ``scenarios/`` (``*.json`` minus
+    ``*.gold.json`` companions), returning ``[]`` when the directory is missing.
 
     The body is a plain ``list[str]`` (not a schema model), returned directly
     with a 200 status. Leaves the record, flags, and Event_Log unchanged.
     """
+    if _is_live():
+        return JSONResponse(status_code=200, content=_available_scenario_ids())
     return JSONResponse(status_code=200, content=list(SCENARIO_IDS))
 
 
 @app.post("/api/scenario/{id}/play")
-def post_scenario_play(id: str) -> JSONResponse:
-    """Play a named scenario, returning the current record (Req 7.14, 9.18).
+async def post_scenario_play(id: str) -> JSONResponse:
+    """Play a named scenario, returning the derived current record (Req 7.14, 9.18, 3.5, 3.6).
 
-    For a known scenario id (one in :data:`SCENARIO_IDS`) the Phase 1 stub
-    returns the current mock :class:`PatientRecord` with no side effects (no
-    state mutation). An unknown id is rejected with 404 ``not_found``; the
-    ``HTTPException`` handler serializes the ErrorBody-shaped detail.
+    Stub mode (the default) is unchanged: a known id (one in
+    :data:`SCENARIO_IDS`) returns the current mock :class:`PatientRecord` with
+    no side effects, and an unknown id is rejected with 404 ``not_found`` via
+    the shared ``HTTPException`` handler.
+
+    Live mode streams the scenario transcript through the live pipeline
+    (Req 3.5):
+
+    - A missing ``scenarios/{id}.json`` -> 404 ``not_found`` (Req 3.6).
+    - Otherwise each utterance is loaded, normalized, and run through the SAME
+      per-utterance pipeline as ``POST /api/utterance`` (:func:`_run_live_utterance`),
+      in order, appending + broadcasting its events. Between utterances the
+      handler ``await``s ``asyncio.sleep(delay)`` so SSE subscribers observe
+      incremental updates; the delay defaults to 0.3s and is overridable via
+      ``SCENARIO_PLAY_DELAY_S`` (tests set it to 0).
+    - If an utterance fails validation or the pipeline raises, the handler
+      returns 500 ``processing``. Because play is streamed, events for earlier
+      utterances may already be appended; that partial progress is accepted and
+      intentional for a streamed play.
+
+    After all utterances, the response is the record derived from the Store,
+    validated against :class:`PatientRecord` before sending.
     """
+    if _is_live():
+        # 404 boundary: the id is known iff its transcript file exists (Req 3.6).
+        try:
+            utterances = _load_scenario_utterances(id)
+        except FileNotFoundError:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "category": "not_found",
+                    "detail": f"unknown scenario id: {id}",
+                    "field": "id",
+                },
+            )
+        except Exception as exc:  # noqa: BLE001 - malformed file -> 500
+            return error_response(
+                status_code=500,
+                category="processing",
+                detail=f"failed to load scenario {id}: {exc}",
+            )
+
+        delay = _scenario_play_delay_s()
+        for index, utterance in enumerate(utterances):
+            try:
+                _run_live_utterance(utterance.text, utterance.ts)
+            except Exception as exc:  # noqa: BLE001 - pipeline failure -> 500
+                # Streamed play: events for earlier utterances may already be
+                # appended. That partial progress is accepted (documented above).
+                return error_response(
+                    status_code=500,
+                    category="processing",
+                    detail=(
+                        f"failed to process scenario {id} at utterance "
+                        f"{index}: {exc}"
+                    ),
+                )
+            # Space out appends so SSE subscribers see incremental updates;
+            # skip the sleep after the final utterance.
+            if delay > 0 and index < len(utterances) - 1:
+                await asyncio.sleep(delay)
+
+        rec, _ = store.derive(store.events())
+        return validate_response(rec, PatientRecord)
+
+    # Stub mode: unchanged no-side-effect behavior against the fixed id set.
     if id not in SCENARIO_IDS:
         raise HTTPException(
             status_code=404,
