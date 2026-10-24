@@ -1,0 +1,4 @@
+{
+  "text": "Patient reports no known allergies.",
+  "response": "{\"facts\": [{\"path\": \"allergies\", \"value\": \"none\", \"quote\": \"no known allergies\", \"confidence\": 0.9, \"hedged\": false}]}"
+}

@@ -1,0 +1,4 @@
+{
+  "text": "Gave another aspirin 300mg by mouth just now.",
+  "response": "{\"facts\": [{\"path\": \"meds_given\", \"value\": {\"drug\": \"aspirin\", \"dose\": \"300mg\", \"route\": \"PO\"}, \"quote\": \"another aspirin 300mg\", \"confidence\": 0.9, \"hedged\": false}]}"
+}
