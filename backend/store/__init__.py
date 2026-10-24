@@ -33,7 +33,7 @@ from . import broadcast
 from .broadcast import subscribe
 from .derive import derive
 from .facts import facts_from
-from .log import events, load_from_disk, reset
+from .log import clear, events, load_from_disk, reset
 from .log import append as _log_append
 
 __all__ = [
@@ -44,6 +44,7 @@ __all__ = [
     "subscribe",
     "load_from_disk",
     "reset",
+    "clear",
     "current_state",
 ]
 

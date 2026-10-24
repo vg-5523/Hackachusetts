@@ -669,7 +669,7 @@ def post_utterance(body: UtteranceRequest) -> JSONResponse:
     return validate_response(state.record, PatientRecord)
 
 
-def _run_live_utterance(text: str, ts: Any) -> None:
+def _run_live_utterance(text: str, ts: Any, utterance_id: str | None = None) -> None:
     """Run the live pipeline for ONE utterance, appending its events in order.
 
     This is the reusable core shared by ``POST /api/utterance`` (Task 3.2) and
@@ -699,10 +699,21 @@ def _run_live_utterance(text: str, ts: Any) -> None:
     # to the extraction/safety packages (Req 9.14: no network at import).
     from backend import extraction, safety
 
-    # (a)/(b) Build the Utterance with a deterministic, event-count-derived id.
-    # Constructing the model validates text/ts against the schema.
+    # (a)/(b) Build the Utterance with a collision-proof id. When the caller
+    # supplies ``utterance_id`` (scenario play does, with a per-play unique
+    # prefix) it is used as-is; otherwise a count-derived id is generated. In
+    # both cases we guarantee the id is not already present in the log by
+    # suffixing a disambiguator if needed, so an append can never hit the
+    # duplicate-id gate. Constructing the model validates text/ts.
+    existing_ids = {e.id for e in store.events()}
+    base_id = utterance_id if utterance_id is not None else f"utt-{len(store.events())}"
+    unique_id = base_id
+    bump = 0
+    while unique_id in existing_ids:
+        bump += 1
+        unique_id = f"{base_id}-{bump}"
     utt = Utterance(
-        id=f"utt-{len(store.events())}",
+        id=unique_id,
         text=text,
         ts=ts,
     )
@@ -840,10 +851,27 @@ async def post_scenario_play(id: str) -> JSONResponse:
                 detail=f"failed to load scenario {id}: {exc}",
             )
 
+        # Replaying a scenario always starts from an EMPTY record: clear the
+        # Store in both memory and the on-disk event_log.json BEFORE playing, so
+        # two plays of the same scenario produce identical records (Req: idempotent
+        # replay). This runs only after the 404/load check above, so a missing or
+        # malformed scenario never wipes live state.
+        store.clear()
+
+        # Deterministic, collision-free utterance ids: ``{id}:{index}``. Because
+        # the store was just cleared the log is empty, so these never collide
+        # with existing ids; and because they do not depend on a random token
+        # or timestamp, replaying the same scenario yields byte-identical ids
+        # (and thus an identical record) every time. ``_run_live_utterance``
+        # still guards against any residual collision by suffixing a bump.
         delay = _scenario_play_delay_s()
         for index, utterance in enumerate(utterances):
             try:
-                _run_live_utterance(utterance.text, utterance.ts)
+                _run_live_utterance(
+                    utterance.text,
+                    utterance.ts,
+                    utterance_id=f"{id}:{index}",
+                )
             except Exception as exc:  # noqa: BLE001 - pipeline failure -> 500
                 # Streamed play: events for earlier utterances may already be
                 # appended. That partial progress is accepted (documented above).

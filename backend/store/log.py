@@ -34,7 +34,7 @@ from shared.schema import Event
 from . import persist
 from .validate import validate_event
 
-__all__ = ["append", "events", "load_from_disk", "reset"]
+__all__ = ["append", "events", "load_from_disk", "reset", "clear"]
 
 
 # The live, in-memory Event_Log: ordered oldest-first, append-only in normal
@@ -117,3 +117,20 @@ def reset(events: list[Event] | None = None) -> None:
     """
     global _events
     _events = [] if events is None else list(events)
+
+
+def clear() -> None:
+    """Clear the Event_Log in BOTH memory and on disk.
+
+    Empties the in-memory log and persists an empty log to
+    ``persist.DEFAULT_PATH`` so a subsequent replay (or a fresh process) also
+    starts empty. This is used by live-mode scenario play so replaying a
+    scenario always begins from an empty record.
+
+    Persistence goes through ``persist.save([])``, which is resilient: a disk
+    hiccup is retried and, if it still fails, logged rather than raised, so
+    clearing never fails a live request. The in-memory log is always emptied.
+    """
+    global _events
+    persist.save([])
+    _events = []
