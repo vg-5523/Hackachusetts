@@ -67,6 +67,54 @@ def _is_live() -> bool:
     return SCRIBE_MODE == "live"
 
 
+def _live_record_and_flags() -> tuple[PatientRecord, list[Flag]]:
+    """Derive the current record and the CURRENT safety flags in live mode.
+
+    Flags are never read from the folded ``flag_raised`` snapshots in the event
+    log, because those can go stale: a flag that an earlier utterance raised may
+    no longer be true after more facts arrive. Instead the record is derived
+    from the Event_Log (the single source of truth) and ``safety.evaluate`` is
+    re-run on it, so the returned flags are exactly what the rules produce for
+    the current record. A flag the rules no longer produce simply disappears.
+
+    Relay/ack progress is preserved by overlaying the lifecycle status from the
+    log's ``flag_relayed`` / ``flag_acked`` events (which the fold tracks on its
+    own flag list, keyed by flag id) onto the freshly-evaluated flags. A flag id
+    with no recorded transition keeps its default ``open``. No new event kinds
+    are introduced and ``shared/`` is untouched.
+    """
+    # Lazy import keeps module import stub-safe (Req 9.14: no import-time coupling).
+    from backend import safety
+
+    events = store.events()
+    record, _ = store.derive(events)
+
+    # Reconstruct each flag's lifecycle status straight from the log's
+    # ``flag_relayed`` / ``flag_acked`` transition events, keyed by flag id. We
+    # read the transition events directly rather than the fold's flag list so
+    # the status survives even when a flag is produced fresh by ``evaluate`` and
+    # was never carried by a ``flag_raised`` snapshot. A relayed id maps to
+    # ``relayed`` unless a later ``flag_acked`` advances it to ``acknowledged``.
+    status_by_id: dict[str, FlagStatus] = {}
+    for event in events:
+        if event.kind == "flag_relayed":
+            flag_id = event.payload.get("flag_id")
+            if flag_id is not None and status_by_id.get(flag_id) is None:
+                status_by_id[flag_id] = FlagStatus.relayed
+        elif event.kind == "flag_acked":
+            flag_id = event.payload.get("flag_id")
+            if flag_id is not None:
+                status_by_id[flag_id] = FlagStatus.acknowledged
+
+    live_flags: list[Flag] = []
+    for flag in safety.evaluate(record):
+        recorded = status_by_id.get(flag.id)
+        if recorded is not None and recorded != flag.status:
+            flag = flag.model_copy(update={"status": recorded})
+        live_flags.append(flag)
+    return record, live_flags
+
+
 # ---------------------------------------------------------------------------
 # App + CORS
 # ---------------------------------------------------------------------------
@@ -365,7 +413,7 @@ def get_flags() -> JSONResponse:
     stub mode is unchanged.
     """
     if _is_live():
-        _, flags = store.derive(store.events())
+        _, flags = _live_record_and_flags()
         return validate_response_list(flags, Flag)
     return validate_response_list(state.flags, Flag)
 
@@ -382,7 +430,7 @@ def get_sbar() -> JSONResponse:
     the Store's Event_Log; stub mode is unchanged.
     """
     if _is_live():
-        record, flags = store.derive(store.events())
+        record, flags = _live_record_and_flags()
         sbar = make_sbar(record, flags)
         return JSONResponse(status_code=200, content=sbar)
     sbar = make_sbar(state.record, state.flags)
@@ -399,7 +447,7 @@ def get_pre_alert() -> JSONResponse:
     from the Store's Event_Log; stub mode is unchanged.
     """
     if _is_live():
-        record, flags = store.derive(store.events())
+        record, flags = _live_record_and_flags()
         pre_alert = make_pre_alert(record, flags)
         return JSONResponse(status_code=200, content=pre_alert)
     pre_alert = make_pre_alert(state.record, state.flags)
@@ -417,7 +465,7 @@ def get_checklist() -> JSONResponse:
     Store's Event_Log; stub mode is unchanged.
     """
     if _is_live():
-        record, _ = store.derive(store.events())
+        record, _ = _live_record_and_flags()
         checklist = make_checklist(record)
         return JSONResponse(status_code=200, content=checklist)
     checklist = make_checklist(state.record)
@@ -1203,28 +1251,41 @@ async def stream(request: Request) -> StreamingResponse:
     generator exits cleanly and never hangs.
     """
 
+    def _stream_record_and_flags() -> tuple[PatientRecord, list[Flag]]:
+        # Live mode streams the derived record and the CURRENT re-evaluated
+        # flags (same source as GET /api/flags), so a stale flag never lingers
+        # on the stream; stub mode streams the in-memory mock.
+        if _is_live():
+            return _live_record_and_flags()
+        return (
+            PatientRecord.model_validate(state.record),
+            [Flag.model_validate(flag) for flag in state.flags],
+        )
+
     async def event_generator() -> Any:
         # Initial burst: record, then flags, then clocks, all validated against
         # their schema models before serialization.
-        record = PatientRecord.model_validate(state.record)
+        record, flags = _stream_record_and_flags()
         yield _sse("record", record.model_dump(mode="json"))
-
-        flags = [Flag.model_validate(flag) for flag in state.flags]
         yield _sse("flags", [flag.model_dump(mode="json") for flag in flags])
 
         now = datetime.now(timezone.utc)
-        clocks = Clocks.model_validate(_build_clocks(state.record, now))
+        clocks = Clocks.model_validate(_build_clocks(record, now))
         yield _sse("clocks", clocks.model_dump(mode="json"))
 
         # Steady state: one ``clocks`` event per second until the client
         # disconnects. Checking ``is_disconnected`` each loop lets the generator
-        # exit cleanly (and keeps tests from hanging).
+        # exit cleanly (and keeps tests from hanging). The clocks are computed
+        # from the current record (derived in live mode, mock in stub mode).
         while True:
             await asyncio.sleep(1)
             if await request.is_disconnected():
                 break
+            clock_record = (
+                _live_record_and_flags()[0] if _is_live() else state.record
+            )
             now = datetime.now(timezone.utc)
-            clocks = Clocks.model_validate(_build_clocks(state.record, now))
+            clocks = Clocks.model_validate(_build_clocks(clock_record, now))
             yield _sse("clocks", clocks.model_dump(mode="json"))
 
     return StreamingResponse(

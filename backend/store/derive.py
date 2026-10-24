@@ -35,6 +35,14 @@ Conflict rules for a scalar / ``allergies`` ``Sourced`` target (Req 2.1-2.3):
 - Different value: KEEP the old value, append the new source, set status
   ``conflicted``. The value is never overwritten.
 
+Free-text fields (``chief_complaint`` and ``notes``) are an exception to the
+contradiction rule: a differing observation is NOT marked ``conflicted``.
+Instead the longer, more specific value is kept as the value, both sources are
+merged (deduped on ``(utterance_id, quote)``), and the status stays
+``unverified``. The conflict rule above still applies to ``age``, ``sex``,
+``suspected_condition``, ``acuity_esi`` and ``eta``; ``allergies`` keeps its
+list-merge behaviour.
+
 This module only reads model definitions from ``shared.schema`` and never edits
 shared state. Targets Python 3.11 and Pydantic v2.
 """
@@ -74,6 +82,13 @@ _SCALAR_FIELDS: frozenset[str] = frozenset(
         "allergies",
     }
 )
+
+# Free-text Sourced fields whose differing observations are MERGED rather than
+# marked ``conflicted``: the longer value is kept, both sources are merged, and
+# the status stays ``unverified``. ``notes`` is included so that if a ``notes``
+# Sourced path is ever added it is already covered; today only
+# ``chief_complaint`` is a reachable free-text Sourced scalar.
+_FREE_TEXT_FIELDS: frozenset[str] = frozenset({"chief_complaint", "notes"})
 
 
 def _resolve_sourced(record: PatientRecord, path: str) -> Sourced | None:
@@ -130,11 +145,18 @@ def _apply_scalar_fact(
     value: Any,
     source: SourceRef,
     confidence: float,
+    field_name: str,
 ) -> None:
     """Mutate an already-copied ``Sourced`` ``field`` per the conflict rules.
 
     ``field`` is a fresh deep copy owned by the new record, so mutating it in
     place does not touch the caller's input state.
+
+    Free-text fields (``field_name`` in :data:`_FREE_TEXT_FIELDS`) never
+    conflict: on a differing observation the longer value is kept, the source is
+    merged, and the status stays ``unverified``. Every other scalar field keeps
+    the contradiction rule (different value -> keep old value, mark
+    ``conflicted``).
     """
     if not field.sources:
         # Empty provenance: first observation wins, marked unverified.
@@ -150,7 +172,20 @@ def _apply_scalar_fact(
             field.sources.append(source)
         return
 
-    # Different value: never overwrite. Keep the old value, record the
+    # Different value.
+    if field_name in _FREE_TEXT_FIELDS:
+        # Free-text: do not contradict. Keep the longer, more specific value,
+        # merge the source, and leave the field unverified (never conflicted).
+        current_len = len(field.value) if isinstance(field.value, str) else 0
+        incoming_len = len(value) if isinstance(value, str) else 0
+        if incoming_len > current_len:
+            field.value = value
+        if not _already_cited(field.sources, source):
+            field.sources.append(source)
+        field.status = FieldStatus.unverified
+        return
+
+    # Every other scalar field: never overwrite. Keep the old value, record the
     # conflicting source, mark the field conflicted.
     if not _already_cited(field.sources, source):
         field.sources.append(source)
@@ -249,7 +284,7 @@ def _apply_fact(record: PatientRecord, payload: dict) -> None:
         # hidden behind an earlier "no known allergies" (==> value []).
         _apply_allergies_fact(target, value, source, confidence)
         return
-    _apply_scalar_fact(target, value, source, confidence)
+    _apply_scalar_fact(target, value, source, confidence, path)
 
 
 def _apply_flag_raised(flags: list[Flag], payload: dict) -> None:
