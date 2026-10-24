@@ -1,0 +1,70 @@
+{
+  "_about": "Curated safety rules for the demo. The RxNav drug-interaction API is retired (returns HTTP 404), so interactions are sourced from this file rather than fetched at runtime. Drug names are matched after RxNorm normalization, falling back to the lowercased name. Citations are decision-support references, not clinical advice.",
+  "classes": {
+    "penicillin": ["penicillin", "amoxicillin"]
+  },
+  "citations": {
+    "allergy_cross_reactivity": {
+      "name": "Beta-lactam allergy cross-reactivity (synthetic reference)",
+      "url": "https://example.org/safety/beta-lactam-cross-reactivity"
+    },
+    "allergy_conflict": {
+      "name": "Drug allergy screening guidance (synthetic reference)",
+      "url": "https://example.org/safety/allergy-conflict"
+    },
+    "duplicate_dose": {
+      "name": "Duplicate medication administration guidance (synthetic reference)",
+      "url": "https://example.org/safety/duplicate-dose"
+    },
+    "contradiction": {
+      "name": "Contradictory field documentation guidance (synthetic reference)",
+      "url": "https://example.org/safety/contradiction"
+    },
+    "missing_info": {
+      "name": "Missing critical information guidance (synthetic reference)",
+      "url": "https://example.org/safety/missing-info"
+    },
+    "nitro_sildenafil": {
+      "name": "Nitrate and PDE5 inhibitor interaction (synthetic reference)",
+      "url": "https://example.org/interactions/nitrate-pde5"
+    },
+    "opioid_opioid": {
+      "name": "Concurrent opioid administration (synthetic reference)",
+      "url": "https://example.org/interactions/opioid-opioid"
+    },
+    "opioid_naloxone": {
+      "name": "Opioid reversal with naloxone (synthetic reference)",
+      "url": "https://example.org/interactions/opioid-naloxone"
+    }
+  },
+  "interactions": [
+    {
+      "rule_key": "nitroglycerin+sildenafil",
+      "drugs": ["nitroglycerin", "sildenafil"],
+      "severity": "critical",
+      "message": "Nitroglycerin given with sildenafil (a PDE5 inhibitor) can cause profound, refractory hypotension.",
+      "citation": "nitro_sildenafil"
+    },
+    {
+      "rule_key": "morphine+fentanyl",
+      "drugs": ["morphine", "fentanyl"],
+      "severity": "warn",
+      "message": "Morphine and fentanyl are both opioids; concurrent administration raises the risk of respiratory depression.",
+      "citation": "opioid_opioid"
+    },
+    {
+      "rule_key": "morphine+naloxone",
+      "drugs": ["morphine", "naloxone"],
+      "severity": "warn",
+      "message": "Naloxone given after morphine will reverse opioid effect; expect loss of analgesia and possible withdrawal.",
+      "citation": "opioid_naloxone"
+    },
+    {
+      "rule_key": "fentanyl+naloxone",
+      "drugs": ["fentanyl", "naloxone"],
+      "severity": "warn",
+      "message": "Naloxone given after fentanyl will reverse opioid effect; expect loss of analgesia and possible withdrawal.",
+      "citation": "opioid_naloxone"
+    }
+  ]
+}
